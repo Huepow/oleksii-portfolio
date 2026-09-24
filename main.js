@@ -977,7 +977,7 @@
   const HOT = 1.4;
   /** Olivia: ~35% bigger than resting (resting already 1.44× card-w). */
   const HOT_OLIVIA = 1.35;
-  const HOT_BLENDER = 1.32;
+  const HOT_BLENDER = 1.72; /* wow47: +30% vs prior 1.32 */
   const HOT_TANGPOKO = 1.4;
   /** MVFW sits upper-left - slightly softer hot so expand + inward fit orbit. */
   const HOT_MVFW = 1.45;
@@ -987,7 +987,7 @@
   const HOT_VRIDIA = 1.42;
   const VIEW_PAD = 14;
   /** Inward slide (px) when Blender is hot - toward orbit center, not edge balloon. */
-  const BLENDER_INWARD = 64;
+  const BLENDER_INWARD = 83; /* wow47: +30% vs prior 64 so larger hot fits centerward */
   /** Stronger inward (px) for Tangpoko - lower-left edge, keep expand inside orbit. */
   const TANGPOKO_INWARD = 84;
   /** MVFW upper-left - slide toward center while growing down. */
@@ -999,7 +999,7 @@
   /** Olivia right edge - stronger inward so featured + grid fit without scroll. */
   const OLIVIA_INWARD = 112;
   /** Cards that expand to natural height (no maxHeight / peach scrollbar). */
-  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia"]);
+  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia", "tangpoko", "before-backrooms"]);
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -2096,7 +2096,7 @@
    */
   function fitHotCardHeight(card, scaleHint) {
     if (!card) return;
-    /* Euphoria / VRIDIA / Olivia: expand to content height - no internal scrollbar. */
+    /* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox: expand to content - no internal scrollbar. */
     if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) {
       card.style.maxHeight = "";
       syncCardScrollBubble(card);
@@ -2213,6 +2213,112 @@
       },
       { passive: false }
     );
+  }
+
+
+  /* wow47: bio magnetic tilt + hover scale via CSS vars (--bio-rx/ry/hover-scale) */
+  function setupBioMagnetic() {
+    if (!bio || reduceMotion || coarsePointer) return;
+
+    const LERP = 0.38;
+    const HOVER_SCALE = 1.05;
+    let raf = 0;
+    const state = {
+      rx: 0,
+      ry: 0,
+      scale: 1,
+      tRx: 0,
+      tRy: 0,
+      tScale: 1,
+      hovering: false,
+    };
+
+    function apply() {
+      bio.style.setProperty("--bio-rx", `${state.rx.toFixed(3)}deg`);
+      bio.style.setProperty("--bio-ry", `${state.ry.toFixed(3)}deg`);
+      bio.style.setProperty("--bio-hover-scale", state.scale.toFixed(4));
+    }
+
+    function tick() {
+      raf = 0;
+      state.rx += (state.tRx - state.rx) * LERP;
+      state.ry += (state.tRy - state.ry) * LERP;
+      state.scale += (state.tScale - state.scale) * LERP;
+      const moving =
+        Math.abs(state.tRx - state.rx) > 0.02 ||
+        Math.abs(state.tRy - state.ry) > 0.02 ||
+        Math.abs(state.tScale - state.scale) > 0.002;
+      if (!moving) {
+        state.rx = state.tRx;
+        state.ry = state.tRy;
+        state.scale = state.tScale;
+      }
+      apply();
+      if (moving) raf = requestAnimationFrame(tick);
+    }
+
+    function kick() {
+      if (!raf) raf = requestAnimationFrame(tick);
+    }
+
+    function targetScale() {
+      if (!state.hovering) return 1;
+      if (bio.classList.contains("is-expanded")) return 1;
+      return HOVER_SCALE;
+    }
+
+    function syncHoverScale() {
+      state.tScale = targetScale();
+      kick();
+    }
+
+    bio.addEventListener("pointerenter", () => {
+      if (!isDesktopOrbit()) return;
+      state.hovering = true;
+      state.tScale = targetScale();
+      kick();
+    });
+    bio.addEventListener("pointerleave", () => {
+      state.hovering = false;
+      state.tRx = 0;
+      state.tRy = 0;
+      state.tScale = 1;
+      kick();
+    });
+    bio.addEventListener("pointermove", (e) => {
+      if (!isDesktopOrbit()) return;
+      if (bio.classList.contains("is-expanded") && hasActiveTextSelection(bio)) return;
+      const rect = bio.getBoundingClientRect();
+      const w = Math.max(1, rect.width);
+      const h = Math.max(1, rect.height);
+      const px = (e.clientX - rect.left) / w - 0.5;
+      const py = (e.clientY - rect.top) / h - 0.5;
+      state.tRy = px * 5;
+      state.tRx = -py * 4;
+      state.tScale = targetScale();
+      kick();
+    });
+    bio.addEventListener("focusin", () => {
+      if (!isDesktopOrbit()) return;
+      state.hovering = true;
+      syncHoverScale();
+    });
+    bio.addEventListener("focusout", (e) => {
+      if (bio.contains(e.relatedTarget)) return;
+      if (bio.matches(":hover")) {
+        syncHoverScale();
+        return;
+      }
+      state.hovering = false;
+      state.tRx = 0;
+      state.tRy = 0;
+      state.tScale = 1;
+      kick();
+    });
+
+    /* Expand toggle changes whether hover-scale applies (class on #bio). */
+    const mo = new MutationObserver(() => syncHoverScale());
+    mo.observe(bio, { attributes: true, attributeFilter: ["class"] });
   }
 
   /* Magnetic hover - HOT ~1.4 (Olivia/VRIDIA/Euphoria full no-scroll + inward); sibling push */
@@ -2733,6 +2839,7 @@
   setupLangSwitch();
   scheduleLayout();
   setupMagnetic();
+  setupBioMagnetic();
   /* Wheel scroll for hot cards even when magnetic hover is off (touch / reduced motion). */
   cardEls.forEach((card) => {
     if (!card._hotWheelBound) {
