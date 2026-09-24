@@ -1,4 +1,4 @@
-/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow39 */
+/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow40 */
 
 :root {
   --gold: #f3d48a;
@@ -1092,16 +1092,24 @@ body.bio-expanded .card:not(.is-hot) {
   transform-origin: top center;
 }
 
-/* Digital Euphoria: expand fully without internal scroll (no maxHeight scrollbar). */
+/* Euphoria / VRIDIA / Olivia: expand fully without internal scroll (no peach scrollbar). */
 .card[data-id="digital-euphoria"].is-hot,
-.card[data-id="digital-euphoria"].is-expanded {
+.card[data-id="digital-euphoria"].is-expanded,
+.card[data-id="vridia"].is-hot,
+.card[data-id="vridia"].is-expanded,
+.card[data-id="olivia"].is-hot,
+.card[data-id="olivia"].is-expanded {
   overflow: hidden;
   overflow-y: hidden;
   max-height: none !important;
   scrollbar-width: none;
 }
 .card[data-id="digital-euphoria"].is-hot::-webkit-scrollbar,
-.card[data-id="digital-euphoria"].is-expanded::-webkit-scrollbar {
+.card[data-id="digital-euphoria"].is-expanded::-webkit-scrollbar,
+.card[data-id="vridia"].is-hot::-webkit-scrollbar,
+.card[data-id="vridia"].is-expanded::-webkit-scrollbar,
+.card[data-id="olivia"].is-hot::-webkit-scrollbar,
+.card[data-id="olivia"].is-expanded::-webkit-scrollbar {
   width: 0;
   height: 0;
   display: none;

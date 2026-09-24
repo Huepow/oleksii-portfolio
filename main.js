@@ -950,8 +950,8 @@
   const HOT_MVFW = 1.45;
   /** Digital Euphoria - room for full non-scrolling expand with inward + growDown. */
   const HOT_EUPHORIA = 1.38;
-  /** VRIDIA - modest bump over default HOT when clamp allows. */
-  const HOT_VRIDIA = 1.5;
+  /** VRIDIA - soft enough that full desc + CTA fit without scroll after inward + growDown. */
+  const HOT_VRIDIA = 1.42;
   const VIEW_PAD = 14;
   /** Inward slide (px) when Blender is hot - toward orbit center, not edge balloon. */
   const BLENDER_INWARD = 64;
@@ -961,10 +961,12 @@
   const MVFW_INWARD = 92;
   /** Digital Euphoria upper - stronger inward so full card (CTAs) fits without scroll. */
   const EUPHORIA_INWARD = 110;
-  /** VRIDIA top - slide toward center (~50–70px). */
-  const VRIDIA_INWARD = 64;
-  /** Olivia right edge - slide toward center so ~1.35 hot has width room. */
-  const OLIVIA_INWARD = 96;
+  /** VRIDIA top - stronger inward so full non-scroll expand stays in orbit. */
+  const VRIDIA_INWARD = 96;
+  /** Olivia right edge - stronger inward so featured + grid fit without scroll. */
+  const OLIVIA_INWARD = 112;
+  /** Cards that expand to natural height (no maxHeight / peach scrollbar). */
+  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia"]);
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -1793,8 +1795,8 @@
    */
   function fitHotCardHeight(card, scaleHint) {
     if (!card) return;
-    /* Digital Euphoria must expand fully with no internal scrollbar. */
-    if (card.dataset?.id === "digital-euphoria") {
+    /* Euphoria / VRIDIA / Olivia: expand to content height - no internal scrollbar. */
+    if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) {
       card.style.maxHeight = "";
       return;
     }
@@ -1867,7 +1869,7 @@
     card.addEventListener(
       "wheel",
       (e) => {
-        if (card.dataset?.id === "digital-euphoria") return;
+        if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) return;
         if (!card.classList.contains("is-hot") && !card.classList.contains("is-expanded")) return;
         const maxScroll = card.scrollHeight - card.clientHeight;
         if (maxScroll <= 1) return;
@@ -1903,7 +1905,7 @@
     );
   }
 
-  /* Magnetic hover - HOT ~1.4 (Olivia 1.35+inward, VRIDIA 1.5+inward, Euphoria full no-scroll); sibling push */
+  /* Magnetic hover - HOT ~1.4 (Olivia/VRIDIA/Euphoria full no-scroll + inward); sibling push */
   function setupMagnetic() {
     if (reduceMotion || coarsePointer) return;
 
