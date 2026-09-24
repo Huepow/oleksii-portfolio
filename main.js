@@ -918,13 +918,13 @@
       return;
     }
     const short = window.matchMedia("(min-width: 861px) and (max-height: 760px)").matches;
-    /* wow42: wider plate + taller expand so full bio+skills fit with little/no scroll. */
+    /* wow43: narrow resting plate; expand widens + scale so full bio+skills fit. */
     let desired = short ? 1.28 : 1.4;
     const oW = orbit.clientWidth;
     const oH = orbit.clientHeight;
     /* Leave breathing room around the plate (~10% / 48px) - slightly tighter than wow41 for fit. */
     const pad = Math.max(48, Math.round(Math.min(oW, oH) * 0.1));
-    const bw = bio.offsetWidth || 420;
+    const bw = bio.offsetWidth || 240;
     const bh = bio.offsetHeight || 180;
     const maxScale = Math.min((oW - pad * 2) / bw, (oH - pad * 2) / bh);
     desired = Math.min(desired, Math.max(1, maxScale * 0.92));
