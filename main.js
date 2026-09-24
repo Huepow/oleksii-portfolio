@@ -1506,6 +1506,7 @@
     /* pulseOrbitPush snapshots positions then placeOrbit once - no second layout pass */
     pulseOrbitPush();
     syncBioScrollHint(bioExpanded);
+    syncBioScrollLine(bioExpanded);
   }
 
   /* Real 4-point star / cross-glint sparkles - tight annulus around visible photo face */
@@ -1795,6 +1796,7 @@
     );
 
     setupBioScrollHint();
+    setupBioScrollLine();
     setupPhotoSparkles();
     setupBioPhotoLightbox();
     bindBioWheel();
@@ -1886,6 +1888,78 @@
       },
       { passive: true }
     );
+  }
+
+  /* Peach scroll line: visible on .bio-inner hover when expanded + scrollable */
+  let bioScrollLineHideTimer = 0;
+
+  function setBioScrollLineVisible(on) {
+    const inner = getBioInner();
+    if (!inner) return;
+    clearTimeout(bioScrollLineHideTimer);
+    inner.classList.toggle("is-scroll-line-visible", !!on);
+  }
+
+  function refreshBioScrollLineScrollable() {
+    const inner = getBioInner();
+    if (!inner) return;
+    const can = bioExpanded && bioInnerIsScrollable();
+    inner.classList.toggle("is-scrollable", can);
+    if (!can) {
+      setBioScrollLineVisible(false);
+    }
+  }
+
+  function syncBioScrollLine(expanded) {
+    const inner = getBioInner();
+    if (!expanded) {
+      setBioScrollLineVisible(false);
+      if (inner) inner.classList.remove("is-scrollable");
+      return;
+    }
+    requestAnimationFrame(() => {
+      refreshBioScrollLineScrollable();
+      requestAnimationFrame(refreshBioScrollLineScrollable);
+    });
+    setTimeout(refreshBioScrollLineScrollable, 280);
+  }
+
+  function setupBioScrollLine() {
+    const inner = getBioInner();
+    if (!inner || inner._bioScrollLineBound) return;
+    inner._bioScrollLineBound = true;
+
+    const show = () => {
+      if (!bioExpanded) return;
+      refreshBioScrollLineScrollable();
+      if (!inner.classList.contains("is-scrollable")) return;
+      setBioScrollLineVisible(true);
+    };
+    const hide = () => {
+      setBioScrollLineVisible(false);
+    };
+
+    inner.addEventListener("pointerenter", show);
+    inner.addEventListener("pointerleave", hide);
+    /* Touch / coarse: flash line while actively scrolling the text column */
+    inner.addEventListener(
+      "scroll",
+      () => {
+        if (!bioExpanded || !inner.classList.contains("is-scrollable")) return;
+        setBioScrollLineVisible(true);
+        clearTimeout(bioScrollLineHideTimer);
+        bioScrollLineHideTimer = setTimeout(() => {
+          if (inner.matches(":hover")) return;
+          setBioScrollLineVisible(false);
+        }, 900);
+      },
+      { passive: true }
+    );
+    inner.addEventListener("focusin", show);
+    inner.addEventListener("focusout", (e) => {
+      if (inner.contains(e.relatedTarget)) return;
+      hide();
+    });
   }
 
 

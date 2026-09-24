@@ -459,21 +459,54 @@ body.bio-expanded {
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(243, 212, 138, 0.45) rgba(8, 10, 18, 0.25);
+  /* Default: near-invisible; peach fades in on text-area hover / .is-scroll-line-visible */
+  scrollbar-color: transparent transparent;
   touch-action: pan-y;
   padding-right: 2px;
+  /* Decorative scroll line (inset stays in scrollport; transitions unlike WebKit thumb) */
+  box-shadow: inset -3px 0 0 0 transparent;
+  transition:
+    box-shadow 0.28s ease,
+    scrollbar-color 0.28s ease;
+}
+.bio.is-expanded .bio-inner.is-scrollable.is-scroll-line-visible,
+.bio.is-expanded .bio-inner.is-scrollable:hover {
+  scrollbar-color: rgba(243, 212, 138, 0.55) rgba(8, 10, 18, 0.2);
+  box-shadow: inset -3px 0 0 0 rgba(243, 212, 138, 0.62);
+}
+/* Coarse pointer: faint rest line when scrollable; brighten while scrolling / focused */
+@media (hover: none), (pointer: coarse) {
+  .bio.is-expanded .bio-inner.is-scrollable {
+    box-shadow: inset -3px 0 0 0 rgba(243, 212, 138, 0.18);
+    scrollbar-color: rgba(243, 212, 138, 0.22) rgba(8, 10, 18, 0.12);
+  }
+  .bio.is-expanded .bio-inner.is-scrollable.is-scroll-line-visible {
+    box-shadow: inset -3px 0 0 0 rgba(243, 212, 138, 0.62);
+    scrollbar-color: rgba(243, 212, 138, 0.55) rgba(8, 10, 18, 0.2);
+  }
 }
 .bio.is-expanded .bio-inner::-webkit-scrollbar {
   width: 4px;
 }
+.bio.is-expanded .bio-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
 .bio.is-expanded .bio-inner::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+}
+.bio.is-expanded .bio-inner.is-scrollable.is-scroll-line-visible::-webkit-scrollbar-thumb,
+.bio.is-expanded .bio-inner.is-scrollable:hover::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
     rgba(255, 190, 140, 0.55),
     rgba(243, 212, 138, 0.5),
     rgba(255, 150, 180, 0.45)
   );
-  border-radius: 999px;
+}
+.bio.is-expanded .bio-inner.is-scrollable.is-scroll-line-visible::-webkit-scrollbar-track,
+.bio.is-expanded .bio-inner.is-scrollable:hover::-webkit-scrollbar-track {
+  background: rgba(8, 10, 18, 0.2);
 }
 .bio.is-expanded .bio-extended-inner {
   overflow: visible;
