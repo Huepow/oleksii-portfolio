@@ -1,4 +1,4 @@
-/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow40 */
+/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow41 */
 
 :root {
   --gold: #f3d48a;
@@ -480,6 +480,79 @@ body.bio-expanded {
   align-self: flex-start;
   position: sticky;
   top: 0;
+}
+
+
+/* Expanded bio: soft neon “Scroll down” in gutter between text and photo */
+.bio-scroll-hint {
+  display: none;
+  margin: 0;
+  padding: 0.2rem 0.12rem;
+  flex: 0 0 auto;
+  align-self: center;
+  max-height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  font-family: var(--font-display);
+  font-size: clamp(0.48rem, 0.72vw, 0.58rem);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: none;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  color: rgba(255, 228, 190, 0.88);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.bio.is-expanded .bio-scroll-hint:not([hidden]) {
+  display: block;
+  animation: bio-scroll-hint-pulse 2.5s ease-in-out infinite;
+}
+
+.bio.is-expanded .bio-scroll-hint.is-dismissed {
+  animation: none;
+  opacity: 0 !important;
+  transition: opacity 0.45s ease;
+}
+
+@keyframes bio-scroll-hint-pulse {
+  0%, 100% {
+    opacity: 0.14;
+    color: rgba(255, 200, 170, 0.55);
+    text-shadow:
+      0 0 4px rgba(255, 180, 140, 0.15),
+      0 0 10px rgba(243, 212, 138, 0.08),
+      0 0 16px rgba(255, 150, 180, 0.06);
+  }
+  42% {
+    opacity: 0.22;
+    color: rgba(255, 220, 185, 0.7);
+    text-shadow:
+      0 0 6px rgba(255, 190, 150, 0.28),
+      0 0 14px rgba(243, 212, 138, 0.18),
+      0 0 22px rgba(255, 150, 180, 0.12);
+  }
+  52% {
+    opacity: 0.96;
+    color: rgba(255, 236, 205, 0.98);
+    text-shadow:
+      0 0 6px rgba(255, 210, 170, 0.95),
+      0 0 14px rgba(243, 212, 138, 0.75),
+      0 0 26px rgba(255, 160, 180, 0.55),
+      0 0 40px rgba(255, 140, 170, 0.28);
+  }
+  62% {
+    opacity: 0.55;
+    color: rgba(255, 220, 185, 0.85);
+    text-shadow:
+      0 0 8px rgba(255, 190, 150, 0.45),
+      0 0 18px rgba(243, 212, 138, 0.32),
+      0 0 28px rgba(255, 150, 180, 0.2);
+  }
 }
 
 .bio.is-expanded::after {
@@ -2005,6 +2078,7 @@ body.bio-expanded .card:not(.is-hot) {
   .badge.featured,
   .card,
   .bio.is-expanded .bio-sheen,
+  .bio.is-expanded .bio-scroll-hint,
   .card::after,
   .bio.is-expanded::after,
   .card[data-id="vridia"] .card-title,
@@ -2014,6 +2088,14 @@ body.bio-expanded .card:not(.is-hot) {
   }
   .card.is-moving {
     filter: none !important;
+  }
+  .bio.is-expanded .bio-scroll-hint:not([hidden]):not(.is-dismissed) {
+    opacity: 0.72;
+    color: rgba(255, 228, 190, 0.9);
+    text-shadow:
+      0 0 8px rgba(255, 190, 150, 0.45),
+      0 0 18px rgba(243, 212, 138, 0.28),
+      0 0 28px rgba(255, 150, 180, 0.18);
   }
   .bio-sparkles {
     display: none !important;

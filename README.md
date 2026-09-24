@@ -16,8 +16,8 @@ Visit: http://127.0.0.1:8765/
 | Path | Role |
 |------|------|
 | `index.html` | Structure, bio copy, Olivia modal |
-| `styles.css?v=wow40` | Hall stage, neon light-push, glass, orbit, mobile stack |
-| `main.js?v=wow40` | Projects, polar placement + exclusion, hover, parallax, particles |
+| `styles.css?v=wow41` | Hall stage, neon light-push, glass, orbit, mobile stack |
+| `main.js?v=wow41` | Projects, polar placement + exclusion, hover, parallax, particles |
 | `assets/hall.jpg` | Full-bleed hall background |
 
 ## Orbit exclusion

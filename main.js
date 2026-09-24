@@ -240,6 +240,7 @@
       skill3body: "- concepts like VRIDIA, Blender architecture, metaverse film sets, Roblox worlds I experiment with and develop in Roblox Studio",
       skill4title: "Media fusion",
       skill4body: "- lyrics, pop, music, visuals, videos, CapCut edits, silicon intelligence collaboration, video imagine materials.",
+      scrollDown: "Scroll down",
       open: "Open ↗",
       enterCity: "Enter city ↗",
       listenThermo: "Listen with thermodynamic album visuals ↗",
@@ -278,6 +279,7 @@
       skill3body: "- Konzepte wie VRIDIA, Blender-Architektur, Metaverse-Filmsets, Roblox-Welten, die ich in Roblox Studio ausprobiere und entwickle",
       skill4title: "Media Fusion",
       skill4body: "- Lyrics, Pop, Musik, Visuals, Videos, CapCut-Schnitte, Zusammenarbeit mit Silizium-Intelligenz, Video-Imagine-Material.",
+      scrollDown: "Nach unten scrollen",
       open: "Öffnen ↗",
       enterCity: "Stadt betreten ↗",
       listenThermo: "Anhören mit thermodynamischen Album-Visuals ↗",
@@ -1496,6 +1498,7 @@
     );
     /* pulseOrbitPush snapshots positions then placeOrbit once - no second layout pass */
     pulseOrbitPush();
+    syncBioScrollHint(bioExpanded);
   }
 
   /* Real 4-point star / cross-glint sparkles - tight annulus around visible photo face */
@@ -1783,9 +1786,98 @@
       true
     );
 
+    setupBioScrollHint();
     setupPhotoSparkles();
     setupBioPhotoLightbox();
     bindBioWheel();
+  }
+
+  /* Glow “Scroll down” in expanded bio gutter when .bio-inner can scroll */
+  let bioScrollHintDismissed = false;
+  let bioScrollHintHideTimer = 0;
+
+  function getBioInner() {
+    return bio?.querySelector(".bio-inner") || null;
+  }
+
+  function getBioScrollHint() {
+    return document.getElementById("bioScrollHint");
+  }
+
+  function bioInnerIsScrollable() {
+    const inner = getBioInner();
+    if (!inner) return false;
+    return inner.scrollHeight > inner.clientHeight + 8;
+  }
+
+  function hideBioScrollHint(opts) {
+    const hint = getBioScrollHint();
+    if (!hint) return;
+    const dismiss = !!(opts && opts.dismiss);
+    clearTimeout(bioScrollHintHideTimer);
+    if (dismiss) {
+      hint.classList.add("is-dismissed");
+      bioScrollHintHideTimer = setTimeout(() => {
+        if (!hint.classList.contains("is-dismissed")) return;
+        hint.setAttribute("hidden", "");
+        hint.setAttribute("aria-hidden", "true");
+      }, 450);
+      return;
+    }
+    hint.classList.remove("is-dismissed");
+    hint.setAttribute("hidden", "");
+    hint.setAttribute("aria-hidden", "true");
+  }
+
+  function showBioScrollHint() {
+    const hint = getBioScrollHint();
+    if (!hint) return;
+    clearTimeout(bioScrollHintHideTimer);
+    hint.classList.remove("is-dismissed");
+    hint.removeAttribute("hidden");
+    hint.setAttribute("aria-hidden", "false");
+  }
+
+  function refreshBioScrollHintVisibility() {
+    if (!bioExpanded || bioScrollHintDismissed) {
+      if (!bioExpanded) hideBioScrollHint();
+      return;
+    }
+    if (bioInnerIsScrollable()) showBioScrollHint();
+    else hideBioScrollHint();
+  }
+
+  function syncBioScrollHint(expanded) {
+    if (!expanded) {
+      bioScrollHintDismissed = false;
+      hideBioScrollHint();
+      return;
+    }
+    bioScrollHintDismissed = false;
+    /* Layout + extended skills open async - recheck after paint / short delay */
+    requestAnimationFrame(() => {
+      refreshBioScrollHintVisibility();
+      requestAnimationFrame(refreshBioScrollHintVisibility);
+    });
+    setTimeout(refreshBioScrollHintVisibility, 280);
+  }
+
+  function setupBioScrollHint() {
+    const hint = getBioScrollHint();
+    const inner = getBioInner();
+    if (!hint || !inner || inner._bioScrollHintBound) return;
+    inner._bioScrollHintBound = true;
+    inner.addEventListener(
+      "scroll",
+      () => {
+        if (!bioExpanded || bioScrollHintDismissed) return;
+        if (inner.scrollTop > 24) {
+          bioScrollHintDismissed = true;
+          hideBioScrollHint({ dismiss: true });
+        }
+      },
+      { passive: true }
+    );
   }
 
 
