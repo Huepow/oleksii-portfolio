@@ -227,7 +227,7 @@
       langLabel: "Language",
       projects: "Projects",
       bio1: "Hello - my name is Oleksii.",
-      bio2: "I'm 32 and based in Berlin - a creative technologist and artist.",
+      bio2: "I'm based in Berlin - a creative technologist and artist.",
       bio3: "I write lyrics and futuristic pop - often with silicon intelligence - and I build virtual personas, including a virtual singer.",
       bio4: "I make music videos myself: concept and plot, then film in virtual worlds or generate scenes with Video Imagine, then edit by hand in CapCut.",
       bio5: "I also invent virtual-world concepts, design architecture that mixes futurism with ancient energy, shoot metaverse mini-films inside hand-built worlds with a crew, and experiment with and develop Roblox worlds in Roblox Studio.",
@@ -265,7 +265,7 @@
       langLabel: "Sprache",
       projects: "Projekte",
       bio1: "Hallo - ich heiße Oleksii.",
-      bio2: "Ich bin 32 und lebe in Berlin - Creative Technologist und Künstler.",
+      bio2: "Ich lebe in Berlin - Creative Technologist und Künstler.",
       bio3: "Ich schreibe Lyrics und futuristischen Pop - oft mit Silizium-Intelligenz - und baue virtuelle Personas, inklusive einer virtuellen Sängerin.",
       bio4: "Musikvideos mache ich selbst: zuerst Konzept und Plot, dann Dreh in virtuellen Welten oder Szenen mit Video Imagine, dann manueller CapCut-Schnitt.",
       bio5: "Außerdem erfinde ich Konzepte für virtuelle Welten, entwerfe Architektur aus Futurismus und alter Energie, drehe Metaverse-Mini-Filme in handgebauten Welten mit einem Team und experimentiere mit Roblox-Welten in Roblox Studio und entwickle sie.",
@@ -902,25 +902,35 @@
       .getPropertyValue("--bio-expand-scale")
       .trim();
     const parsed = parseFloat(raw);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.85;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.32;
   }
 
-  /** Keep expanded bio AABB inside orbit with ~14px padding. */
+  /** Keep expanded bio AABB inside orbit with generous margin; modest scale + internal scroll. */
   function clampBioExpandScale() {
     if (!bio || !orbit || !isDesktopOrbit() || reduceMotion) {
       document.documentElement.style.removeProperty("--bio-expand-scale");
+      document.documentElement.style.removeProperty("--bio-expand-max-h");
       return;
     }
     const short = window.matchMedia("(min-width: 861px) and (max-height: 760px)").matches;
-    let desired = short ? 1.65 : 1.85;
+    /* Noticeably smaller than wow38 (1.85) - not near-fullscreen. */
+    let desired = short ? 1.22 : 1.32;
     const oW = orbit.clientWidth;
     const oH = orbit.clientHeight;
-    const pad = 14;
+    /* Leave more breathing room around the plate (~12% / 56px). */
+    const pad = Math.max(56, Math.round(Math.min(oW, oH) * 0.12));
     const bw = bio.offsetWidth || 300;
     const bh = bio.offsetHeight || 160;
     const maxScale = Math.min((oW - pad * 2) / bw, (oH - pad * 2) / bh);
-    desired = Math.min(desired, Math.max(1, maxScale * 0.98));
+    desired = Math.min(desired, Math.max(1, maxScale * 0.9));
     document.documentElement.style.setProperty("--bio-expand-scale", String(desired));
+    /* Cap unscaled plate height so visual (maxH * scale) stays in orbit; content scrolls inside. */
+    const visualBudget = Math.max(200, oH - pad * 2);
+    const unscaledMax = Math.floor(visualBudget / Math.max(desired, 1));
+    document.documentElement.style.setProperty(
+      "--bio-expand-max-h",
+      `${Math.max(180, Math.min(unscaledMax, short ? 240 : 268))}px`
+    );
   }
 
   /**
@@ -932,13 +942,16 @@
    */
   /* Default hot ~1.4: bigger card, not near-fullscreen. Per-card overrides below. */
   const HOT = 1.4;
-  const HOT_OLIVIA = 1.45;
+  /** Olivia: ~35% bigger than resting (resting already 1.44× card-w). */
+  const HOT_OLIVIA = 1.35;
   const HOT_BLENDER = 1.32;
   const HOT_TANGPOKO = 1.4;
   /** MVFW sits upper-left - slightly softer hot so expand + inward fit orbit. */
   const HOT_MVFW = 1.45;
-  /** Digital Euphoria - slight soft hot after inward so it stays in orbit. */
+  /** Digital Euphoria - room for full non-scrolling expand with inward + growDown. */
   const HOT_EUPHORIA = 1.38;
+  /** VRIDIA - modest bump over default HOT when clamp allows. */
+  const HOT_VRIDIA = 1.5;
   const VIEW_PAD = 14;
   /** Inward slide (px) when Blender is hot - toward orbit center, not edge balloon. */
   const BLENDER_INWARD = 64;
@@ -946,8 +959,12 @@
   const TANGPOKO_INWARD = 84;
   /** MVFW upper-left - slide toward center while growing down. */
   const MVFW_INWARD = 92;
-  /** Digital Euphoria upper - slide toward center like MVFW. */
-  const EUPHORIA_INWARD = 80;
+  /** Digital Euphoria upper - stronger inward so full card (CTAs) fits without scroll. */
+  const EUPHORIA_INWARD = 110;
+  /** VRIDIA top - slide toward center (~50–70px). */
+  const VRIDIA_INWARD = 64;
+  /** Olivia right edge - slide toward center so ~1.35 hot has width room. */
+  const OLIVIA_INWARD = 96;
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -960,6 +977,7 @@
     if (id === "tangpoko") return HOT_TANGPOKO;
     if (id === "mvfw") return HOT_MVFW;
     if (id === "digital-euphoria") return HOT_EUPHORIA;
+    if (id === "vridia") return HOT_VRIDIA;
     return HOT;
   }
 
@@ -969,6 +987,8 @@
     if (id === "tangpoko") return TANGPOKO_INWARD;
     if (id === "mvfw") return MVFW_INWARD;
     if (id === "digital-euphoria") return EUPHORIA_INWARD;
+    if (id === "vridia") return VRIDIA_INWARD;
+    if (id === "olivia") return OLIVIA_INWARD;
     return 0;
   }
 
@@ -1026,8 +1046,9 @@
          Tangpoko also slides inward - use pushed center for edge pad (≥10px). */
       let cxEff = baseX;
       let cyEff = baseY;
-      if (card.dataset.id === "tangpoko" && card.classList.contains("is-hot")) {
-        const inward = inwardTowardCenter(card, TANGPOKO_INWARD);
+      const inwardAmtUp = inwardAmountFor(card);
+      if (inwardAmtUp && card.classList.contains("is-hot")) {
+        const inward = inwardTowardCenter(card, inwardAmtUp);
         cxEff = baseX + inward.x;
         cyEff = baseY + inward.y;
       }
@@ -1042,11 +1063,12 @@
       const maxScale = Math.min((2 * maxHalfWAdj) / cw, maxScaleH);
       return Math.max(1, Math.min(desiredScale, maxScale));
     } else {
-      /* Blender hot slides inward - estimate pushed center for edge pad (≥10px). */
+      /* Blender / Olivia hot slide inward - estimate pushed center for edge pad. */
       let cxEff = baseX;
       let cyEff = baseY;
-      if (card.dataset.id === "blender" && card.classList.contains("is-hot")) {
-        const inward = inwardTowardCenter(card, BLENDER_INWARD);
+      const inwardAmtElse = inwardAmountFor(card);
+      if (inwardAmtElse && card.classList.contains("is-hot")) {
+        const inward = inwardTowardCenter(card, inwardAmtElse);
         cxEff = baseX + inward.x;
         cyEff = baseY + inward.y;
       }
@@ -1761,6 +1783,7 @@
 
     setupPhotoSparkles();
     setupBioPhotoLightbox();
+    bindBioWheel();
   }
 
 
@@ -1770,6 +1793,11 @@
    */
   function fitHotCardHeight(card, scaleHint) {
     if (!card) return;
+    /* Digital Euphoria must expand fully with no internal scrollbar. */
+    if (card.dataset?.id === "digital-euphoria") {
+      card.style.maxHeight = "";
+      return;
+    }
     if (!isDesktopOrbit() || constellation?.classList.contains("is-stacked")) {
       /* Mobile stacked: keep cards from oddly tall overflow */
       if (card.classList.contains("is-hot") || card.classList.contains("is-expanded")) {
@@ -1839,6 +1867,7 @@
     card.addEventListener(
       "wheel",
       (e) => {
+        if (card.dataset?.id === "digital-euphoria") return;
         if (!card.classList.contains("is-hot") && !card.classList.contains("is-expanded")) return;
         const maxScroll = card.scrollHeight - card.clientHeight;
         if (maxScroll <= 1) return;
@@ -1852,7 +1881,29 @@
     );
   }
 
-  /* Magnetic hover - HOT ~1.4 (Olivia 1.45, Blender 1.32+inward, Euphoria inward); sibling push */
+  /** Wheel over expanded bio content: scroll .bio-inner (scale can flake native wheel). */
+  function bindBioWheel() {
+    if (!bio || bio._bioWheelBound) return;
+    bio._bioWheelBound = true;
+    bio.addEventListener(
+      "wheel",
+      (e) => {
+        if (!bio.classList.contains("is-expanded")) return;
+        const inner = bio.querySelector(".bio-inner");
+        if (!inner) return;
+        const maxScroll = inner.scrollHeight - inner.clientHeight;
+        if (maxScroll <= 1) return;
+        const next = Math.max(0, Math.min(maxScroll, inner.scrollTop + e.deltaY));
+        if (next === inner.scrollTop) return;
+        e.preventDefault();
+        e.stopPropagation();
+        inner.scrollTop = next;
+      },
+      { passive: false }
+    );
+  }
+
+  /* Magnetic hover - HOT ~1.4 (Olivia 1.35+inward, VRIDIA 1.5+inward, Euphoria full no-scroll); sibling push */
   function setupMagnetic() {
     if (reduceMotion || coarsePointer) return;
 
