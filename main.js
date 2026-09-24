@@ -240,6 +240,7 @@
       skill3body: "- concepts like VRIDIA, Blender architecture, metaverse film sets, Roblox worlds I experiment with and develop in Roblox Studio",
       skill4title: "Media fusion",
       skill4body: "- lyrics, pop, music, visuals, videos, CapCut edits, silicon intelligence collaboration, video imagine materials.",
+      clickExpand: "Click to EXPAND",
       scrollDown: "Scroll down",
       open: "Open ↗",
       enterCity: "Enter city ↗",
@@ -279,6 +280,7 @@
       skill3body: "- Konzepte wie VRIDIA, Blender-Architektur, Metaverse-Filmsets, Roblox-Welten, die ich in Roblox Studio ausprobiere und entwickle",
       skill4title: "Media Fusion",
       skill4body: "- Lyrics, Pop, Musik, Visuals, Videos, CapCut-Schnitte, Zusammenarbeit mit Silizium-Intelligenz, Video-Imagine-Material.",
+      clickExpand: "Zum AUSKLAPPEN klicken",
       scrollDown: "Nach unten scrollen",
       open: "Öffnen ↗",
       enterCity: "Stadt betreten ↗",
@@ -358,6 +360,7 @@
   const orbit = document.getElementById("orbit");
   const bio = document.getElementById("bio");
   const bioExtended = document.getElementById("bioExtended");
+  const bioMore = document.getElementById("bioMore");
   const lightPush = document.getElementById("lightPush");
   const modal = document.getElementById("oliviaModal");
   const oliviaGrid = document.getElementById("oliviaGrid");
@@ -904,7 +907,7 @@
       .getPropertyValue("--bio-expand-scale")
       .trim();
     const parsed = parseFloat(raw);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.32;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1.4;
   }
 
   /** Keep expanded bio AABB inside orbit with generous margin; modest scale + internal scroll. */
@@ -915,23 +918,23 @@
       return;
     }
     const short = window.matchMedia("(min-width: 861px) and (max-height: 760px)").matches;
-    /* Noticeably smaller than wow38 (1.85) - not near-fullscreen. */
-    let desired = short ? 1.22 : 1.32;
+    /* wow42: wider plate + taller expand so full bio+skills fit with little/no scroll. */
+    let desired = short ? 1.28 : 1.4;
     const oW = orbit.clientWidth;
     const oH = orbit.clientHeight;
-    /* Leave more breathing room around the plate (~12% / 56px). */
-    const pad = Math.max(56, Math.round(Math.min(oW, oH) * 0.12));
-    const bw = bio.offsetWidth || 300;
-    const bh = bio.offsetHeight || 160;
+    /* Leave breathing room around the plate (~10% / 48px) - slightly tighter than wow41 for fit. */
+    const pad = Math.max(48, Math.round(Math.min(oW, oH) * 0.1));
+    const bw = bio.offsetWidth || 420;
+    const bh = bio.offsetHeight || 180;
     const maxScale = Math.min((oW - pad * 2) / bw, (oH - pad * 2) / bh);
-    desired = Math.min(desired, Math.max(1, maxScale * 0.9));
+    desired = Math.min(desired, Math.max(1, maxScale * 0.92));
     document.documentElement.style.setProperty("--bio-expand-scale", String(desired));
-    /* Cap unscaled plate height so visual (maxH * scale) stays in orbit; content scrolls inside. */
-    const visualBudget = Math.max(200, oH - pad * 2);
+    /* Prefer fitting content over scroll; still orbit-capped. */
+    const visualBudget = Math.max(220, oH - pad * 2);
     const unscaledMax = Math.floor(visualBudget / Math.max(desired, 1));
     document.documentElement.style.setProperty(
       "--bio-expand-max-h",
-      `${Math.max(180, Math.min(unscaledMax, short ? 240 : 268))}px`
+      `${Math.max(220, Math.min(unscaledMax, short ? 340 : 420))}px`
     );
   }
 
@@ -1488,6 +1491,10 @@
     bio.classList.toggle("is-expanded", bioExpanded);
     document.body.classList.toggle("bio-expanded", bioExpanded);
     bio.setAttribute("aria-expanded", bioExpanded ? "true" : "false");
+    if (bioMore) {
+      if (bioExpanded) bioMore.removeAttribute("hidden");
+      else bioMore.setAttribute("hidden", "");
+    }
     if (bioExtended) {
       if (bioExpanded) bioExtended.removeAttribute("hidden");
       else bioExtended.setAttribute("hidden", "");
@@ -1746,8 +1753,9 @@
     /* Click-to-toggle only (Olivia-like) - NO hover/focus auto-expand */
     bio.style.cursor = "pointer";
     bio.setAttribute("aria-expanded", bioExpanded ? "true" : "false");
-    if (bioExtended) {
-      bio.setAttribute("aria-controls", "bioExtended");
+    const controls = [bioMore && "bioMore", bioExtended && "bioExtended"].filter(Boolean);
+    if (controls.length) {
+      bio.setAttribute("aria-controls", controls.join(" "));
     }
 
     const email = bio.querySelector("a.bio-email");
