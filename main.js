@@ -165,8 +165,8 @@
     },
     {
       id: "tangpoko",
-      type: "Architecture film",
-      title: "Architecture mini film",
+      type: "Project",
+      title: "Tangpoko Project",
       description:
         "Recorded in the Decentraland metaverse as a glimpse of the future - 10+ people in the shoot, inside a custom world built from premade 3D assets and scripted by hand. The whole project - shooting, the island world, music, and editing - was made by me.",
       url: "https://youtu.be/P93lj2rhKyA",
