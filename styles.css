@@ -1264,7 +1264,7 @@ body.bio-expanded .card:not(.is-hot) {
   transform-origin: top center;
 }
 
-/* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox: expand fully without internal scroll. */
+/* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox / Virtual Space: expand fully without internal scroll. */
 .card[data-id="digital-euphoria"].is-hot,
 .card[data-id="digital-euphoria"].is-expanded,
 .card[data-id="vridia"].is-hot,
@@ -1274,7 +1274,9 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="tangpoko"].is-hot,
 .card[data-id="tangpoko"].is-expanded,
 .card[data-id="before-backrooms"].is-hot,
-.card[data-id="before-backrooms"].is-expanded {
+.card[data-id="before-backrooms"].is-expanded,
+.card[data-id="blender"].is-hot,
+.card[data-id="blender"].is-expanded {
   overflow: hidden;
   overflow-y: hidden;
   max-height: none !important;
@@ -1289,7 +1291,9 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="tangpoko"].is-hot::-webkit-scrollbar,
 .card[data-id="tangpoko"].is-expanded::-webkit-scrollbar,
 .card[data-id="before-backrooms"].is-hot::-webkit-scrollbar,
-.card[data-id="before-backrooms"].is-expanded::-webkit-scrollbar {
+.card[data-id="before-backrooms"].is-expanded::-webkit-scrollbar,
+.card[data-id="blender"].is-hot::-webkit-scrollbar,
+.card[data-id="blender"].is-expanded::-webkit-scrollbar {
   width: 0;
   height: 0;
   display: none;
@@ -1999,6 +2003,12 @@ body.bio-expanded .card:not(.is-hot) {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
+}
+
+.card[data-id="blender"].is-hot .blender-grid,
+.card[data-id="blender"].is-expanded .blender-grid {
+  overflow-y: hidden;
+  max-height: none;
 }
 
 .blender-grid {

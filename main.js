@@ -996,10 +996,12 @@
   const EUPHORIA_INWARD = 110;
   /** VRIDIA top - stronger inward so full non-scroll expand stays in orbit. */
   const VRIDIA_INWARD = 96;
+  /** VRIDIA hot/expanded - modest upward nudge while preserving top-pad clamp. */
+  const VRIDIA_HOT_LIFT = -36;
   /** Olivia right edge - stronger inward so featured + grid fit without scroll. */
   const OLIVIA_INWARD = 112;
   /** Cards that expand to natural height (no maxHeight / peach scrollbar). */
-  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia", "tangpoko", "before-backrooms"]);
+  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia", "tangpoko", "before-backrooms", "blender"]);
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -1056,6 +1058,8 @@
     const maxHalfW = Math.max(8, Math.min(baseX - VIEW_PAD, oW - VIEW_PAD - baseX));
     const expandDown = EXPAND_DOWN_IDS.has(card.dataset.id);
     const expandUp = EXPAND_UP_IDS.has(card.dataset.id);
+    const hotOrExpanded =
+      card.classList.contains("is-hot") || card.classList.contains("is-expanded");
     let maxScaleH;
     if (expandDown) {
       /* Top edge stays near resting top; growth goes down - clamp by bottom room.
@@ -1063,10 +1067,13 @@
       let cxEff = baseX;
       let cyEff = baseY;
       const inwardAmt = inwardAmountFor(card);
-      if (inwardAmt && card.classList.contains("is-hot")) {
+      if (inwardAmt && hotOrExpanded) {
         const inward = inwardTowardCenter(card, inwardAmt);
         cxEff = baseX + inward.x;
         cyEff = baseY + inward.y;
+      }
+      if (card.dataset.id === "vridia" && hotOrExpanded) {
+        cyEff += VRIDIA_HOT_LIFT;
       }
       const topEdge = cyEff - ch / 2;
       const roomBelow = Math.max(8, oH - VIEW_PAD - topEdge);
@@ -2096,8 +2103,9 @@
    */
   function fitHotCardHeight(card, scaleHint) {
     if (!card) return;
-    /* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox: expand to content - no internal scrollbar. */
-    if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) {
+    const noScroll = NO_SCROLL_HOT_IDS.has(card.dataset?.id);
+    /* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox / Virtual Space: expand to content - no internal scrollbar. */
+    if (noScroll && (!isDesktopOrbit() || constellation?.classList.contains("is-stacked"))) {
       card.style.maxHeight = "";
       syncCardScrollBubble(card);
       return;
@@ -2131,10 +2139,21 @@
     const inwardAmt = inwardAmountFor(card);
     let cxEff = baseX;
     let cyEff = baseY;
+    const hotOrExpanded =
+      card.classList.contains("is-hot") || card.classList.contains("is-expanded");
     if (inwardAmt) {
       const inward = inwardTowardCenter(card, inwardAmt);
       cxEff = baseX + inward.x;
       cyEff = baseY + inward.y;
+    }
+    if (card.dataset.id === "vridia" && hotOrExpanded) {
+      cyEff += VRIDIA_HOT_LIFT;
+    }
+    if (noScroll) {
+      /* No max-height cap, but keep effective center in sync with the hot transform. */
+      card.style.maxHeight = "";
+      syncCardScrollBubble(card);
+      return;
     }
     const scale =
       scaleHint ||
@@ -2343,8 +2362,13 @@
         const growUp = EXPAND_UP_IDS.has(card.dataset.id)
           ? -((s.scale - 1) * h) / 2
           : 0;
+        const vridiaLift =
+          card.dataset.id === "vridia" &&
+          (card.classList.contains("is-hot") || card.classList.contains("is-expanded"))
+            ? VRIDIA_HOT_LIFT
+            : 0;
         card.style.transform =
-          `translate3d(calc(-50% + ${pushX}px), calc(-50% + ${pushY + growDown + growUp}px), 0) scale(${s.scale}) rotateX(${s.rotX}deg) rotateY(${s.rotY}deg)`;
+          `translate3d(calc(-50% + ${pushX}px), calc(-50% + ${pushY + growDown + growUp + vridiaLift}px), 0) scale(${s.scale}) rotateX(${s.rotX}deg) rotateY(${s.rotY}deg)`;
       } else {
         card.style.transform = `scale(${s.scale})`;
       }
