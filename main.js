@@ -918,7 +918,7 @@
       return;
     }
     const short = window.matchMedia("(min-width: 861px) and (max-height: 760px)").matches;
-    /* wow43: narrow resting plate; expand widens + scale so full bio+skills fit. */
+    /* wow44: wider resting plate; expand widens + scale so full bio+skills fit. */
     let desired = short ? 1.28 : 1.4;
     const oW = orbit.clientWidth;
     const oH = orbit.clientHeight;
