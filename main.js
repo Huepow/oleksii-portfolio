@@ -759,21 +759,53 @@
     });
   }
 
+  let modalScrollLockY = 0;
+  let modalScrollLocked = false;
+
+  function lockBodyForModal() {
+    if (modalScrollLocked) {
+      document.body.classList.add("modal-open");
+      return;
+    }
+    modalScrollLockY = window.scrollY || window.pageYOffset || 0;
+    modalScrollLocked = true;
+    document.body.style.top = `-${modalScrollLockY}px`;
+    document.body.classList.add("modal-open");
+  }
+
+  function unlockBodyForModal() {
+    if (!modalScrollLocked) {
+      document.body.classList.remove("modal-open");
+      document.body.style.top = "";
+      return;
+    }
+    modalScrollLocked = false;
+    document.body.classList.remove("modal-open");
+    document.body.style.top = "";
+    window.scrollTo(0, modalScrollLockY);
+  }
+
+  function anyPortfolioModalOpen() {
+    return (
+      (modal && !modal.hidden) ||
+      (blenderModal && !blenderModal.hidden) ||
+      (lightbox && !lightbox.hidden)
+    );
+  }
+
   function openBlenderModal() {
     if (!blenderModal) return;
     if (!blenderModal.hidden) return;
     lastFocus = document.activeElement;
     fillBlenderModal();
     blenderModal.hidden = false;
-    document.body.classList.add("modal-open");
+    lockBodyForModal();
   }
 
   function closeBlenderModal() {
     if (!blenderModal || blenderModal.hidden) return;
     blenderModal.hidden = true;
-    if (lightbox?.hidden !== false) {
-      document.body.classList.remove("modal-open");
-    }
+    if (!anyPortfolioModalOpen()) unlockBodyForModal();
     if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
   }
 
@@ -782,16 +814,14 @@
     lightboxImg.src = src;
     lightboxImg.alt = alt || "";
     lightbox.hidden = false;
-    document.body.classList.add("modal-open");
+    lockBodyForModal();
   }
 
   function closeLightbox() {
     if (!lightbox || lightbox.hidden) return;
     lightbox.hidden = true;
     lightboxImg.src = "";
-    const anyModalOpen =
-      (modal && !modal.hidden) || (blenderModal && !blenderModal.hidden);
-    if (!anyModalOpen) document.body.classList.remove("modal-open");
+    if (!anyPortfolioModalOpen()) unlockBodyForModal();
   }
 
   function makeOliviaModalTile(v, { featured = false } = {}) {
@@ -848,15 +878,13 @@
     lastFocus = document.activeElement;
     fillOliviaModal();
     modal.hidden = false;
-    document.body.classList.add("modal-open");
+    lockBodyForModal();
   }
 
   function closeOliviaModal() {
     if (!modal || modal.hidden) return;
     modal.hidden = true;
-    const anyOpen =
-      (blenderModal && !blenderModal.hidden) || (lightbox && !lightbox.hidden);
-    if (!anyOpen) document.body.classList.remove("modal-open");
+    if (!anyPortfolioModalOpen()) unlockBodyForModal();
     if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
   }
 
@@ -1506,7 +1534,7 @@
     /* pulseOrbitPush snapshots positions then placeOrbit once - no second layout pass */
     pulseOrbitPush();
     syncBioScrollHint(bioExpanded);
-    syncBioScrollLine(bioExpanded);
+    syncBioScrollBubble(bioExpanded);
   }
 
   /* Real 4-point star / cross-glint sparkles - tight annulus around visible photo face */
@@ -1796,7 +1824,7 @@
     );
 
     setupBioScrollHint();
-    setupBioScrollLine();
+    setupBioScrollBubble();
     setupPhotoSparkles();
     setupBioPhotoLightbox();
     bindBioWheel();
@@ -1890,79 +1918,180 @@
     );
   }
 
-  /* Peach scroll line: visible on .bio-inner hover when expanded + scrollable */
-  let bioScrollLineHideTimer = 0;
-
-  function setBioScrollLineVisible(on) {
-    const inner = getBioInner();
-    if (!inner) return;
-    clearTimeout(bioScrollLineHideTimer);
-    inner.classList.toggle("is-scroll-line-visible", !!on);
+  /* Classic always-visible peach/gold scroll bubble (bio + scrollable cards) */
+  function ensureScrollBubble(el) {
+    if (!el) return null;
+    let bubble = el.querySelector(":scope > .scroll-bubble");
+    if (bubble) return bubble;
+    bubble = document.createElement("div");
+    bubble.className = "scroll-bubble";
+    bubble.setAttribute("aria-hidden", "true");
+    bubble.hidden = true;
+    bubble.innerHTML =
+      '<div class="scroll-bubble-track"><div class="scroll-bubble-thumb"></div></div>';
+    el.appendChild(bubble);
+    bindScrollBubbleInteraction(el, bubble);
+    if (!el._scrollBubbleScrollBound) {
+      el._scrollBubbleScrollBound = true;
+      el.addEventListener(
+        "scroll",
+        () => {
+          updateScrollBubbleThumb(el);
+        },
+        { passive: true }
+      );
+    }
+    return bubble;
   }
 
-  function refreshBioScrollLineScrollable() {
+  function updateScrollBubbleThumb(el) {
+    const bubble = el && el.querySelector(":scope > .scroll-bubble");
+    if (!bubble || bubble.hidden) return;
+    const thumb = bubble.querySelector(".scroll-bubble-thumb");
+    if (!thumb) return;
+    const ch = el.clientHeight;
+    const sh = el.scrollHeight;
+    if (ch <= 0 || sh <= 0) return;
+    /* Keep overlay glued to the visible scrollport while content scrolls */
+    bubble.style.top = `${el.scrollTop}px`;
+    bubble.style.height = `${ch}px`;
+    const ratio = Math.min(1, ch / sh);
+    const thumbH = Math.max(28, Math.round(ch * ratio));
+    const maxScroll = Math.max(0, sh - ch);
+    const trackTravel = Math.max(0, ch - thumbH);
+    const thumbTop =
+      maxScroll > 0 ? (el.scrollTop / maxScroll) * trackTravel : 0;
+    thumb.style.height = `${thumbH}px`;
+    thumb.style.transform = `translateY(${thumbTop}px)`;
+  }
+
+  function syncScrollBubble(el, enabled) {
+    if (!el) return;
+    const bubble = ensureScrollBubble(el);
+    if (!bubble) return;
+    const can =
+      !!enabled && el.scrollHeight > el.clientHeight + 8;
+    el.classList.toggle("is-scrollable", can);
+    bubble.hidden = !can;
+    if (!can) {
+      bubble.style.top = "";
+      bubble.style.height = "";
+      return;
+    }
+    updateScrollBubbleThumb(el);
+  }
+
+  function bindScrollBubbleInteraction(el, bubble) {
+    if (!bubble || bubble._dragBound) return;
+    bubble._dragBound = true;
+    const track = bubble.querySelector(".scroll-bubble-track");
+    const thumb = bubble.querySelector(".scroll-bubble-thumb");
+    if (!track || !thumb) return;
+
+    const scrollFromClientY = (clientY) => {
+      const rect = track.getBoundingClientRect();
+      const ch = el.clientHeight;
+      const sh = el.scrollHeight;
+      const maxScroll = Math.max(0, sh - ch);
+      if (maxScroll <= 0 || rect.height <= 0) return;
+      const thumbH = thumb.offsetHeight || 28;
+      const travel = Math.max(1, rect.height - thumbH);
+      let y = clientY - rect.top - thumbH / 2;
+      y = Math.max(0, Math.min(travel, y));
+      el.scrollTop = (y / travel) * maxScroll;
+      updateScrollBubbleThumb(el);
+    };
+
+    let dragging = false;
+    const onPointerMove = (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      scrollFromClientY(e.clientY);
+    };
+    const onPointerUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    };
+
+    const startDrag = (e) => {
+      if (e.button != null && e.button !== 0) return;
+      dragging = true;
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        thumb.setPointerCapture?.(e.pointerId);
+      } catch (_) {}
+      scrollFromClientY(e.clientY);
+      window.addEventListener("pointermove", onPointerMove, { passive: false });
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointercancel", onPointerUp);
+    };
+
+    thumb.addEventListener("pointerdown", startDrag);
+    track.addEventListener("pointerdown", (e) => {
+      if (e.target === thumb || thumb.contains(e.target)) return;
+      startDrag(e);
+    });
+  }
+
+  function refreshBioScrollBubble() {
     const inner = getBioInner();
     if (!inner) return;
     const can = bioExpanded && bioInnerIsScrollable();
-    inner.classList.toggle("is-scrollable", can);
-    if (!can) {
-      setBioScrollLineVisible(false);
-    }
+    syncScrollBubble(inner, can);
   }
 
-  function syncBioScrollLine(expanded) {
+  function syncBioScrollBubble(expanded) {
     const inner = getBioInner();
     if (!expanded) {
-      setBioScrollLineVisible(false);
-      if (inner) inner.classList.remove("is-scrollable");
+      if (inner) syncScrollBubble(inner, false);
       return;
     }
     requestAnimationFrame(() => {
-      refreshBioScrollLineScrollable();
-      requestAnimationFrame(refreshBioScrollLineScrollable);
+      refreshBioScrollBubble();
+      requestAnimationFrame(refreshBioScrollBubble);
     });
-    setTimeout(refreshBioScrollLineScrollable, 280);
+    setTimeout(refreshBioScrollBubble, 280);
   }
 
-  function setupBioScrollLine() {
+  function setupBioScrollBubble() {
     const inner = getBioInner();
-    if (!inner || inner._bioScrollLineBound) return;
-    inner._bioScrollLineBound = true;
-
-    const show = () => {
-      if (!bioExpanded) return;
-      refreshBioScrollLineScrollable();
-      if (!inner.classList.contains("is-scrollable")) return;
-      setBioScrollLineVisible(true);
-    };
-    const hide = () => {
-      setBioScrollLineVisible(false);
-    };
-
-    inner.addEventListener("pointerenter", show);
-    inner.addEventListener("pointerleave", hide);
-    /* Touch / coarse: flash line while actively scrolling the text column */
-    inner.addEventListener(
-      "scroll",
-      () => {
-        if (!bioExpanded || !inner.classList.contains("is-scrollable")) return;
-        setBioScrollLineVisible(true);
-        clearTimeout(bioScrollLineHideTimer);
-        bioScrollLineHideTimer = setTimeout(() => {
-          if (inner.matches(":hover")) return;
-          setBioScrollLineVisible(false);
-        }, 900);
-      },
-      { passive: true }
-    );
-    inner.addEventListener("focusin", show);
-    inner.addEventListener("focusout", (e) => {
-      if (inner.contains(e.relatedTarget)) return;
-      hide();
-    });
+    if (!inner || inner._bioScrollBubbleBound) return;
+    inner._bioScrollBubbleBound = true;
+    ensureScrollBubble(inner);
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        if (bioExpanded) refreshBioScrollBubble();
+      });
+      ro.observe(inner);
+    }
   }
 
+  function syncCardScrollBubble(card) {
+    if (!card) return;
+    if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) {
+      syncScrollBubble(card, false);
+      return;
+    }
+    const hot =
+      card.classList.contains("is-hot") || card.classList.contains("is-expanded");
+    if (!hot) {
+      syncScrollBubble(card, false);
+      return;
+    }
+    /* Layout may still be settling after max-height — double rAF */
+    requestAnimationFrame(() => {
+      syncScrollBubble(card, true);
+      requestAnimationFrame(() => syncScrollBubble(card, true));
+    });
+    setTimeout(() => syncScrollBubble(card, true), 320);
+  }
 
+  /**
+   * Cap unscaled max-height so after current/hot scale the visual height fits
   /**
    * Cap unscaled max-height so after current/hot scale the visual height fits
    * in the orbit (with pad). Clears when leaving hot. Enables internal scroll.
@@ -1972,6 +2101,7 @@
     /* Euphoria / VRIDIA / Olivia: expand to content height - no internal scrollbar. */
     if (NO_SCROLL_HOT_IDS.has(card.dataset?.id)) {
       card.style.maxHeight = "";
+      syncCardScrollBubble(card);
       return;
     }
     if (!isDesktopOrbit() || constellation?.classList.contains("is-stacked")) {
@@ -1979,19 +2109,23 @@
       if (card.classList.contains("is-hot") || card.classList.contains("is-expanded")) {
         const vh = window.innerHeight || 640;
         card.style.maxHeight = `${Math.max(220, Math.floor(vh * 0.72))}px`;
+        syncCardScrollBubble(card);
       } else {
         card.style.maxHeight = "";
+        syncScrollBubble(card, false);
       }
       return;
     }
     if (!orbit || !(card.classList.contains("is-hot") || card.classList.contains("is-expanded"))) {
       card.style.maxHeight = "";
+      syncScrollBubble(card, false);
       return;
     }
     const baseX = parseFloat(card.dataset.baseX);
     const baseY = parseFloat(card.dataset.baseY);
     if (!Number.isFinite(baseX) || !Number.isFinite(baseY)) {
       card.style.maxHeight = "";
+      syncScrollBubble(card, false);
       return;
     }
     const oW = orbit.clientWidth;
@@ -2030,10 +2164,14 @@
     const softCap = Math.min(roomPx, oH * 0.46);
     const unscaledMax = Math.floor(softCap / safeScale);
     card.style.maxHeight = `${Math.max(160, unscaledMax)}px`;
+    syncCardScrollBubble(card);
   }
 
   function clearHotCardHeight(card) {
-    if (card) card.style.maxHeight = "";
+    if (card) {
+      card.style.maxHeight = "";
+      syncScrollBubble(card, false);
+    }
   }
 
   /** Wheel over hot/expanded card: force internal scroll (transform scale can flake native wheel). */
