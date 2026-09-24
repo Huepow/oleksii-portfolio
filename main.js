@@ -2092,8 +2092,6 @@
 
   /**
    * Cap unscaled max-height so after current/hot scale the visual height fits
-  /**
-   * Cap unscaled max-height so after current/hot scale the visual height fits
    * in the orbit (with pad). Clears when leaving hot. Enables internal scroll.
    */
   function fitHotCardHeight(card, scaleHint) {
