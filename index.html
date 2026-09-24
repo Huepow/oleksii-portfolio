@@ -8,11 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=wow30" />
+  <link rel="stylesheet" href="styles.css?v=wow31" />
 </head>
 <body>
 
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+  <div class="lang-switch" role="group" aria-label="Language" data-i18n-aria="langLabel">
+    <button type="button" class="lang-btn is-active" data-lang="en" aria-pressed="true">ENG</button>
+    <span class="lang-sep" aria-hidden="true">|</span>
+    <button type="button" class="lang-btn" data-lang="de" aria-pressed="false">DE</button>
+  </div>
 
   <div class="stage" aria-hidden="true">
     <div class="hall-bg"></div>
@@ -32,16 +38,16 @@
       <header class="bio glass-plate" id="bio" tabindex="0" aria-expanded="false">
         <div class="bio-sheen" aria-hidden="true"></div>
         <div class="bio-inner">
-          <p class="bio-line">Hello - my name is Oleksii.</p>
-          <p class="bio-line">I'm 32 and based in Berlin - a creative technologist and artist.</p>
-          <p class="bio-line">These are projects I made - some alone, some with other silicon intelligences in collaboration.</p>
-          <p class="bio-line">I build virtual worlds, music videos, and virtual personas, and I write lyrics and music.</p>
+          <p class="bio-line" data-i18n="bio1">Hello - my name is Oleksii.</p>
+          <p class="bio-line" data-i18n="bio2">I'm 32 and based in Berlin - a creative technologist and artist.</p>
+          <p class="bio-line" data-i18n="bio3">These are projects I made - some alone, some with other silicon intelligences in collaboration.</p>
+          <p class="bio-line" data-i18n="bio4">I build virtual worlds, music videos, and virtual personas, and I write lyrics and music.</p>
           <div class="bio-extended" id="bioExtended" hidden>
             <div class="bio-extended-inner">
-              <p class="bio-skill"><strong class="bio-skill-title">Superintelligence</strong> <span class="bio-skill-body">- prompting, local LLMs, agentic systems (Hermes-Agent)</span></p>
-              <p class="bio-skill"><strong class="bio-skill-title">Spatial internet</strong> <span class="bio-skill-body">- Web3→Web4, digital personas, virtual fashion</span></p>
-              <p class="bio-skill"><strong class="bio-skill-title">Virtual worlds</strong> <span class="bio-skill-body">- Blender with agent, 3D, VR, building environments</span></p>
-              <p class="bio-skill"><strong class="bio-skill-title">Media fusion</strong> <span class="bio-skill-body">- music, lyrics, filming inside those worlds and editing, video generation.</span></p>
+              <p class="bio-skill"><strong class="bio-skill-title" data-i18n="skill1title">Superintelligence</strong> <span class="bio-skill-body" data-i18n="skill1body">- prompting, local LLMs, agentic systems (Hermes-Agent)</span></p>
+              <p class="bio-skill"><strong class="bio-skill-title" data-i18n="skill2title">Spatial internet</strong> <span class="bio-skill-body" data-i18n="skill2body">- Web3→Web4, digital personas, virtual fashion</span></p>
+              <p class="bio-skill"><strong class="bio-skill-title" data-i18n="skill3title">Virtual worlds</strong> <span class="bio-skill-body" data-i18n="skill3body">- Blender with agent, 3D, VR, building environments</span></p>
+              <p class="bio-skill"><strong class="bio-skill-title" data-i18n="skill4title">Media fusion</strong> <span class="bio-skill-body" data-i18n="skill4body">- music, lyrics, filming inside those worlds and editing, video generation.</span></p>
             </div>
           </div>
         </div>
@@ -53,7 +59,7 @@
           <a class="bio-email" href="mailto:feklistovoleksii@gmail.com">feklistovoleksii@gmail.com</a>
         </div>
       </header>
-      <section class="constellation" id="constellation" aria-label="Projects"></section>
+      <section class="constellation" id="constellation" aria-label="Projects" data-i18n-aria="projects"></section>
     </div>
   </main>
 
@@ -61,10 +67,10 @@
     <div class="modal-backdrop" data-close-modal="olivia"></div>
     <div class="modal-panel glass" role="dialog" aria-modal="true" aria-labelledby="oliviaModalTitle">
       <div class="modal-header">
-        <h2 id="oliviaModalTitle" class="modal-title">Olivia - The Girl From The Hills</h2>
-        <button type="button" class="modal-close" data-close-modal="olivia" aria-label="Close Olivia gallery">&times;</button>
+        <h2 id="oliviaModalTitle" class="modal-title" data-i18n="oliviaModalTitle">Olivia - The Girl From The Hills</h2>
+        <button type="button" class="modal-close" data-close-modal="olivia" aria-label="Close Olivia gallery" data-i18n-aria="closeOlivia">&times;</button>
       </div>
-      <p class="modal-desc">Her name is Olivia - she make modern pop with magnetic pull.</p>
+      <p class="modal-desc" data-i18n="oliviaModalDesc">Her name is Olivia - she make modern pop with magnetic pull.</p>
       <div class="olivia-grid" id="oliviaGrid"></div>
     </div>
   </div>
@@ -73,20 +79,20 @@
     <div class="modal-backdrop" data-close-modal="blender"></div>
     <div class="modal-panel glass" role="dialog" aria-modal="true" aria-labelledby="blenderModalTitle">
       <div class="modal-header">
-        <h2 id="blenderModalTitle" class="modal-title">Blender project with my Hermes Agent</h2>
-        <button type="button" class="modal-close" data-close-modal="blender" aria-label="Close Blender gallery">&times;</button>
+        <h2 id="blenderModalTitle" class="modal-title" data-i18n="blenderModalTitle">Blender project with my Hermes Agent</h2>
+        <button type="button" class="modal-close" data-close-modal="blender" aria-label="Close Blender gallery" data-i18n-aria="closeBlender">&times;</button>
       </div>
-      <p class="modal-desc">Virtual spaces built in Blender with Hermes Agent - stalls, plazas, and invite architecture.</p>
+      <p class="modal-desc" data-i18n="blenderModalDesc">Virtual spaces built in Blender with my Hermes Agent - stalls, plazas, and invite architecture.</p>
       <div class="blender-grid" id="blenderGrid"></div>
     </div>
   </div>
 
   <div class="lightbox" id="lightbox" hidden>
     <div class="lightbox-backdrop" data-close-lightbox></div>
-    <button type="button" class="lightbox-close" data-close-lightbox aria-label="Close full-size image">&times;</button>
+    <button type="button" class="lightbox-close" data-close-lightbox aria-label="Close full-size image" data-i18n-aria="closeLightbox">&times;</button>
     <img class="lightbox-img" id="lightboxImg" alt="" />
   </div>
 
-  <script src="main.js?v=wow30"></script>
+  <script src="main.js?v=wow31"></script>
 </body>
 </html>

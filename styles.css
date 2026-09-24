@@ -1,4 +1,4 @@
-/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow29 */
+/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow31 */
 
 :root {
   --gold: #f3d48a;
@@ -82,6 +82,89 @@ body.bio-expanded {
   left: 1rem;
   top: 1rem;
 }
+
+
+/* -- Language switcher (fixed top) -- */
+.lang-switch {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 212, 138, 0.38);
+  background: rgba(8, 10, 18, 0.55);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow:
+    0 0 18px rgba(255, 150, 180, 0.18),
+    inset 0 0 12px rgba(243, 212, 138, 0.08);
+}
+
+.lang-sep {
+  color: rgba(255, 180, 160, 0.45);
+  font-size: 0.7rem;
+  user-select: none;
+}
+
+.lang-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(243, 212, 138, 0.55);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    text-shadow 0.25s ease;
+}
+
+.lang-btn:hover,
+.lang-btn:focus-visible {
+  color: var(--gold);
+  outline: none;
+}
+
+.lang-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(255, 150, 180, 0.55);
+}
+
+.lang-btn.is-active {
+  color: #1a1210;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 190, 140, 0.95) 0%,
+    rgba(243, 212, 138, 0.95) 45%,
+    rgba(255, 150, 180, 0.92) 100%
+  );
+  box-shadow:
+    0 0 14px rgba(255, 150, 180, 0.45),
+    0 0 22px rgba(243, 212, 138, 0.28);
+  text-shadow: none;
+}
+
+@media (max-width: 520px) {
+  .lang-switch {
+    top: 0.65rem;
+    right: 0.65rem;
+    padding: 0.28rem 0.4rem;
+  }
+  .lang-btn {
+    font-size: 0.62rem;
+    padding: 0.22rem 0.4rem;
+  }
+}
+
 
 /* Refract rim removed - golden frames (::before/::after) + frosted blur kept */
 .glass-refract {
@@ -1019,6 +1102,22 @@ body.bio-expanded .card:not(.is-hot) {
   z-index: 3;
   padding: 0.55rem 0.65rem 0.35rem;
 }
+
+
+/* Desktop: allow selecting / copying card + bio copy */
+@media (min-width: 861px) {
+  .card-type,
+  .card-title,
+  .card-desc,
+  .bio-line,
+  .bio-skill-title,
+  .bio-skill-body {
+    user-select: text;
+    -webkit-user-select: text;
+    cursor: text;
+  }
+}
+
 
 .card-type {
   display: block;

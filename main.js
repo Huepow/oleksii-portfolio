@@ -107,9 +107,12 @@
   const projects = [
     {
       id: "digital-euphoria",
-      type: "Music album",
+      type: { en: "Music album", de: "Musikalbum" },
       title: "Digital Euphoria",
-      description: "Futuristic pop as a digital golden record with thermodynamic visuals.",
+      description: {
+        en: "Futuristic pop as a digital golden record with thermodynamic visuals.",
+        de: "Futuristischer Pop als digitale goldene Schallplatte mit thermodynamischen Visuals.",
+      },
       url: "https://youtu.be/q2loXuL0Tnk",
       videoId: "q2loXuL0Tnk",
       albumUrl: "https://audius.co/BadHabbits/album/digital-euphoria",
@@ -119,9 +122,12 @@
     },
     {
       id: "olivia",
-      type: "Music Video - Olivia",
+      type: { en: "Music Video - Olivia", de: "Musikvideo - Olivia" },
       title: "Olivia - The Girl From The Hills",
-      description: "Her name is Olivia - she make modern pop with magnetic pull.",
+      description: {
+        en: "Her name is Olivia - she make modern pop with magnetic pull.",
+        de: "Sie heißt Olivia - sie macht modernen Pop mit magnetischer Wirkung.",
+      },
       kind: "olivia",
       featured: oliviaVideos[0],
       videos: oliviaVideos,
@@ -130,10 +136,12 @@
     },
     {
       id: "vridia",
-      type: "Virtual city",
+      type: { en: "Virtual city", de: "Virtuelle Stadt" },
       title: "VRIDIA",
-      description:
-        "A city where different kinds of mind share a public life - and where meaning is the utility grid. Zoom in. Wander the districts. Meaning is the grid - day and night ease like thought.",
+      description: {
+        en: "The prototype city where different kinds of mind share a public life - and where meaning is the utility grid. Zoom in. Wander the districts. Meaning is the grid - day and night ease like thought.",
+        de: "Die Prototyp-Stadt, in der verschiedene Arten von Geist ein öffentliches Leben teilen - und Bedeutung das Versorgungsnetz ist. Zoome rein. Wandere durch die Bezirke. Bedeutung ist das Netz - Tag und Nacht gleiten wie Gedanken.",
+      },
       url: "https://vridia.grok.me",
       kind: "vridia",
       angle: -90,
@@ -141,10 +149,15 @@
     },
     {
       id: "blender",
-      type: "Virtual Space",
-      title: "Blender project with my Hermes Agent",
-      description:
-        "Virtual spaces built in Blender with Hermes Agent - stalls, plazas, and invite architecture.",
+      type: { en: "Virtual Space", de: "Virtueller Raum" },
+      title: {
+        en: "Blender project with my Hermes Agent",
+        de: "Blender-Projekt mit meinem Hermes Agent",
+      },
+      description: {
+        en: "Virtual spaces built in Blender with my Hermes Agent - stalls, plazas, and invite architecture.",
+        de: "Virtuelle Räume in Blender mit meinem Hermes Agent - Stände, Plazas und Invite-Architektur.",
+      },
       kind: "blender",
       featured: blenderImages[0],
       images: blenderImages,
@@ -154,9 +167,14 @@
     {
       id: "before-backrooms",
       type: "Roblox Experience",
-      title: "Before the Backroom - Roblox Experience",
-      description:
-        "A Roblox game where you move through the day and survive the night - bring the light spheres to the altar to open the gates.",
+      title: {
+        en: "Before the Backroom - Roblox Experience",
+        de: "Before the Backroom - Roblox Experience",
+      },
+      description: {
+        en: "A Roblox game where you move through the day and survive the night - bring the light spheres to the altar to open the gates.",
+        de: "Ein Roblox-Spiel, in dem du den Tag durchquerst und die Nacht überlebst - bring die Lichtkugeln zum Altar, um die Tore zu öffnen.",
+      },
       url: "https://www.roblox.com/games/97722993353172/BEFORE-THE-BACKROOMS#!/about",
       kind: "link",
       thumb: "assets/before-the-backrooms.jpg",
@@ -165,10 +183,12 @@
     },
     {
       id: "tangpoko",
-      type: "Project",
+      type: { en: "Project", de: "Projekt" },
       title: "Tangpoko Project",
-      description:
-        "Recorded in the Decentraland metaverse as a glimpse of the future - 10+ people in the shoot, inside a custom world built from premade 3D assets and scripted by hand. The whole project - shooting, the island world, music, and editing - was made by me.",
+      description: {
+        en: "Recorded in the Decentraland metaverse as a glimpse of the future - 10+ people in the shoot, inside a custom world built from premade 3D assets and scripted by hand. The whole project - shooting, the island world, music, and editing - was made by me.",
+        de: "Aufgenommen im Decentraland-Metaverse als Glimpse in die Zukunft - über 10 Personen am Set, in einer Custom-Welt aus fertigen 3D-Assets und von Hand gescriptet. Das ganze Projekt - Dreh, Inselwelt, Musik und Schnitt - habe ich gemacht.",
+      },
       url: "https://youtu.be/P93lj2rhKyA",
       videoId: "P93lj2rhKyA",
       kind: "link",
@@ -177,10 +197,15 @@
     },
     {
       id: "mvfw",
-      type: "Metaverse film",
-      title: "MVFW trailer",
-      description:
-        "A short cut from the Decentraland Fashion Week event.",
+      type: {
+        en: "MVFW architecture mini-film",
+        de: "MVFW Architecture Mini-Film",
+      },
+      title: "The energy vision",
+      description: {
+        en: "A short cut from the Decentraland Fashion Week event.",
+        de: "Ein kurzer Cut vom Decentraland Fashion Week Event.",
+      },
       url: "https://www.youtube.com/watch?v=pyNZqhoNIaM",
       videoId: "pyNZqhoNIaM",
       kind: "link",
@@ -191,6 +216,138 @@
 
   const reduceMotion = window.matchMedia(REDUCE_MQ).matches;
   const coarsePointer = window.matchMedia(COARSE_MQ).matches;
+  function isFineDesktop() {
+    return window.matchMedia(DESKTOP_MQ).matches && !coarsePointer;
+  }
+  const LANG_KEY = "oleksii-lang";
+
+  const I18N = {
+    en: {
+      skip: "Skip to content",
+      langLabel: "Language",
+      projects: "Projects",
+      bio1: "Hello - my name is Oleksii.",
+      bio2: "I'm 32 and based in Berlin - a creative technologist and artist.",
+      bio3: "These are projects I made - some alone, some with other silicon intelligences in collaboration.",
+      bio4: "I build virtual worlds, music videos, and virtual personas, and I write lyrics and music.",
+      skill1title: "Superintelligence",
+      skill1body: "- prompting, local LLMs, agentic systems (Hermes-Agent)",
+      skill2title: "Spatial internet",
+      skill2body: "- Web3→Web4, digital personas, virtual fashion",
+      skill3title: "Virtual worlds",
+      skill3body: "- Blender with agent, 3D, VR, building environments",
+      skill4title: "Media fusion",
+      skill4body: "- music, lyrics, filming inside those worlds and editing, video generation.",
+      open: "Open ↗",
+      enterCity: "Enter city ↗",
+      listenThermo: "Listen with thermodynamic album visuals ↗",
+      listenAudius: "Listen on Audius ↗",
+      featured: "Featured",
+      comingSoon: "Coming soon",
+      soon: "Soon",
+      oliviaModalTitle: "Olivia - The Girl From The Hills",
+      oliviaModalDesc: "Her name is Olivia - she make modern pop with magnetic pull.",
+      blenderModalTitle: "Blender project with my Hermes Agent",
+      blenderModalDesc:
+        "Virtual spaces built in Blender with my Hermes Agent - stalls, plazas, and invite architecture.",
+      closeOlivia: "Close Olivia gallery",
+      closeBlender: "Close Blender gallery",
+      closeLightbox: "Close full-size image",
+      openOliviaGallery: (title, n) =>
+        `${title}. Open gallery of ${n} videos`,
+      openBlenderGallery: (title, n) =>
+        `${title}. Open gallery of ${n} images`,
+    },
+    de: {
+      skip: "Zum Inhalt springen",
+      langLabel: "Sprache",
+      projects: "Projekte",
+      bio1: "Hallo - ich heiße Oleksii.",
+      bio2: "Ich bin 32 und lebe in Berlin - Creative Technologist und Künstler.",
+      bio3: "Das sind Projekte von mir - manche allein, manche zusammen mit anderen Silizium-Intelligenzen.",
+      bio4: "Ich baue virtuelle Welten, Musikvideos und virtuelle Personas und schreibe Lyrics und Musik.",
+      skill1title: "Superintelligenz",
+      skill1body: "- Prompting, lokale LLMs, agentische Systeme (Hermes-Agent)",
+      skill2title: "Spatial Internet",
+      skill2body: "- Web3→Web4, digitale Personas, virtuelle Mode",
+      skill3title: "Virtuelle Welten",
+      skill3body: "- Blender mit Agent, 3D, VR, Environments bauen",
+      skill4title: "Media Fusion",
+      skill4body: "- Musik, Lyrics, Drehen in diesen Welten und Schnitt, Videogenerierung.",
+      open: "Öffnen ↗",
+      enterCity: "Stadt betreten ↗",
+      listenThermo: "Anhören mit thermodynamischen Album-Visuals ↗",
+      listenAudius: "Auf Audius anhören ↗",
+      featured: "Featured",
+      comingSoon: "Demnächst",
+      soon: "Bald",
+      oliviaModalTitle: "Olivia - The Girl From The Hills",
+      oliviaModalDesc:
+        "Sie heißt Olivia - sie macht modernen Pop mit magnetischer Wirkung.",
+      blenderModalTitle: "Blender-Projekt mit meinem Hermes Agent",
+      blenderModalDesc:
+        "Virtuelle Räume in Blender mit meinem Hermes Agent - Stände, Plazas und Invite-Architektur.",
+      closeOlivia: "Olivia-Galerie schließen",
+      closeBlender: "Blender-Galerie schließen",
+      closeLightbox: "Vollbild schließen",
+      openOliviaGallery: (title, n) =>
+        `${title}. Galerie mit ${n} Videos öffnen`,
+      openBlenderGallery: (title, n) =>
+        `${title}. Galerie mit ${n} Bildern öffnen`,
+    },
+  };
+
+  function readStoredLang() {
+    try {
+      const v = localStorage.getItem(LANG_KEY);
+      if (v === "en" || v === "de") return v;
+    } catch (_) {}
+    return "en";
+  }
+
+  let currentLang = readStoredLang();
+
+  function loc(val, lang = currentLang) {
+    if (val && typeof val === "object" && ("en" in val || "de" in val)) {
+      return val[lang] || val.en || "";
+    }
+    return val == null ? "" : String(val);
+  }
+
+  function ui(key, lang = currentLang) {
+    const pack = I18N[lang] || I18N.en;
+    return pack[key];
+  }
+
+  function hasActiveTextSelection(root) {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return false;
+    const text = sel.toString();
+    if (!text || !text.trim()) return false;
+    if (!root) return true;
+    const node = sel.anchorNode;
+    return !!(node && root.contains(node));
+  }
+
+  function bindCardTextSelect(card) {
+    if (!isFineDesktop() || !card) return;
+    card.querySelectorAll(".card-type, .card-title, .card-desc").forEach((el) => {
+      el.addEventListener("mousedown", (e) => {
+        e.stopPropagation();
+      });
+    });
+    const onActivate = (e) => {
+      if (hasActiveTextSelection(card)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    card.addEventListener("click", onActivate, true);
+    if (card.tagName === "A") {
+      card.addEventListener("click", onActivate);
+    }
+  }
+
   const constellation = document.getElementById("constellation");
   const orbit = document.getElementById("orbit");
   const bio = document.getElementById("bio");
@@ -260,24 +417,31 @@
       el.rel = "noopener noreferrer";
     } else {
       el.setAttribute("role", "group");
-      el.setAttribute("aria-label", project.title);
+      el.setAttribute("aria-label", loc(project.title));
       el.tabIndex = 0;
     }
     return el;
   }
 
-  function appendBody(card, project, cta) {
+  function appendBody(card, project, cta, ctaKey) {
     const body = document.createElement("div");
     body.className = "card-body";
+    const type = loc(project.type);
+    const title = loc(project.title);
+    const desc = loc(project.description);
     body.innerHTML = `
-      <span class="card-type">${project.type}</span>
-      <h3 class="card-title">${project.title}</h3>
-      <p class="card-desc">${project.description}</p>
+      <span class="card-type"></span>
+      <h3 class="card-title"></h3>
+      <p class="card-desc"></p>
     `;
+    body.querySelector(".card-type").textContent = type;
+    body.querySelector(".card-title").textContent = title;
+    body.querySelector(".card-desc").textContent = desc;
     card.appendChild(body);
     if (cta) {
       const span = document.createElement("span");
       span.className = "card-cta";
+      if (ctaKey) span.dataset.i18nCta = ctaKey;
       span.textContent = cta;
       card.appendChild(span);
     }
@@ -290,7 +454,7 @@
       card.dataset.id = project.id;
       card.tabIndex = 0;
       card.setAttribute("role", "group");
-      card.setAttribute("aria-label", project.title);
+      card.setAttribute("aria-label", loc(project.title));
       card.style.setProperty("--float-dur", `${4.0 + Math.random() * 1.8}s`);
       card.style.setProperty("--float-delay", `${-Math.random() * 4}s`);
 
@@ -299,7 +463,7 @@
       thumbLink.target = "_blank";
       thumbLink.rel = "noopener noreferrer";
       thumbLink.className = "card-thumb-link";
-      thumbLink.appendChild(makeThumb(project.videoId, `${project.title} thumbnail`));
+      thumbLink.appendChild(makeThumb(project.videoId, `${loc(project.title)} thumbnail`));
       card.appendChild(thumbLink);
 
       appendBody(card, project, null);
@@ -311,16 +475,19 @@
       yt.target = "_blank";
       yt.rel = "noopener noreferrer";
       yt.className = "card-cta card-cta-link";
-      yt.textContent = "Listen with thermodynamic album visuals ↗";
+      yt.dataset.i18nCta = "listenThermo";
+      yt.textContent = ui("listenThermo");
       const au = document.createElement("a");
       au.href = project.albumUrl;
       au.target = "_blank";
       au.rel = "noopener noreferrer";
       au.className = "card-cta card-cta-link card-cta-album";
-      au.textContent = "Listen on Audius ↗";
+      au.dataset.i18nCta = "listenAudius";
+      au.textContent = ui("listenAudius");
       actions.appendChild(yt);
       actions.appendChild(au);
       card.appendChild(actions);
+      bindCardTextSelect(card);
       return card;
     }
 
@@ -330,14 +497,15 @@
       thumb.className = "card-thumb";
       const img = document.createElement("img");
       img.src = project.thumb;
-      img.alt = `${project.title} thumbnail`;
+      img.alt = `${loc(project.title)} thumbnail`;
       prepCardImg(img, { high: true });
       thumb.appendChild(img);
       card.appendChild(thumb);
     } else {
-      card.appendChild(makeThumb(project.videoId, `${project.title} thumbnail`));
+      card.appendChild(makeThumb(project.videoId, `${loc(project.title)} thumbnail`));
     }
-    appendBody(card, project, "Open ↗");
+    appendBody(card, project, ui("open"), "open");
+    bindCardTextSelect(card);
     return card;
   }
 
@@ -351,7 +519,8 @@
     prepCardImg(img, { high: true });
     thumb.appendChild(img);
     card.appendChild(thumb);
-    appendBody(card, project, "Enter city ↗");
+    appendBody(card, project, ui("enterCity"), "enterCity");
+    bindCardTextSelect(card);
     return card;
   }
 
@@ -366,10 +535,11 @@
     thumb.appendChild(art);
     const badge = document.createElement("span");
     badge.className = "badge";
-    badge.textContent = "Soon";
+    badge.textContent = ui("soon");
     thumb.appendChild(badge);
     card.appendChild(thumb);
-    appendBody(card, project, "Coming soon");
+    appendBody(card, project, ui("comingSoon"), "comingSoon");
+    bindCardTextSelect(card);
     return card;
   }
 
@@ -384,7 +554,7 @@
     card.setAttribute("aria-controls", "oliviaModal");
     card.setAttribute(
       "aria-label",
-      `${project.title}. Open gallery of ${project.videos.length} videos`
+      ui("openOliviaGallery")(loc(project.title), project.videos.length)
     );
     card.style.setProperty("--float-dur", "4.6s");
     card.style.setProperty("--float-delay", "-1.2s");
@@ -393,7 +563,8 @@
     featuredWrap.className = "card-thumb olivia-featured";
     const badge = document.createElement("span");
     badge.className = "badge featured";
-    badge.textContent = "Featured";
+    badge.dataset.i18nCta = "featured";
+    badge.textContent = ui("featured");
     featuredWrap.appendChild(badge);
     const img = document.createElement("img");
     img.src = project.featured.thumbs.primary;
@@ -435,6 +606,7 @@
 
     card.addEventListener("click", (e) => {
       if (e.target.closest("a")) return;
+      if (isFineDesktop() && hasActiveTextSelection(card)) return;
       openOliviaModal();
     });
     card.addEventListener("keydown", (e) => {
@@ -445,6 +617,7 @@
         modal?.querySelector(".modal-close")?.focus();
       }
     });
+    bindCardTextSelect(card);
     return card;
   }
 
@@ -477,7 +650,7 @@
     card.setAttribute("aria-controls", "blenderModal");
     card.setAttribute(
       "aria-label",
-      `${project.title}. Open gallery of ${project.images.length} images`
+      ui("openBlenderGallery")(loc(project.title), project.images.length)
     );
     card.style.setProperty("--float-dur", "4.5s");
     card.style.setProperty("--float-delay", "-0.8s");
@@ -487,7 +660,8 @@
     featuredWrap.className = "card-thumb blender-featured";
     const badge = document.createElement("span");
     badge.className = "badge featured";
-    badge.textContent = "Featured";
+    badge.dataset.i18nCta = "featured";
+    badge.textContent = ui("featured");
     featuredWrap.appendChild(badge);
     const img = document.createElement("img");
     img.src = project.featured.src;
@@ -528,6 +702,7 @@
 
     card.addEventListener("click", (e) => {
       if (e.target.closest("button")) return;
+      if (isFineDesktop() && hasActiveTextSelection(card)) return;
       openBlenderModal();
     });
     card.addEventListener("keydown", (e) => {
@@ -538,6 +713,7 @@
         blenderModal?.querySelector(".modal-close")?.focus();
       }
     });
+    bindCardTextSelect(card);
     return card;
   }
 
@@ -552,7 +728,8 @@
     if (featured) {
       const badge = document.createElement("span");
       badge.className = "badge featured";
-      badge.textContent = "Featured";
+      badge.dataset.i18nCta = "featured";
+      badge.textContent = ui("featured");
       wrap.appendChild(badge);
     }
     const img = document.createElement("img");
@@ -632,7 +809,8 @@
     if (featured) {
       const badge = document.createElement("span");
       badge.className = "badge featured";
-      badge.textContent = "Featured";
+      badge.dataset.i18nCta = "featured";
+      badge.textContent = ui("featured");
       wrap.appendChild(badge);
     }
     const img = document.createElement("img");
@@ -1748,6 +1926,7 @@
       });
       card.addEventListener("pointermove", (e) => {
         if (!isDesktopOrbit() || constellation.classList.contains("is-stacked")) return;
+        if (hasActiveTextSelection(card)) return;
         const rect = card.getBoundingClientRect();
         const px = (e.clientX - rect.left) / rect.width - 0.5;
         const py = (e.clientY - rect.top) / rect.height - 0.5;
@@ -1969,8 +2148,78 @@
     });
   }
 
+  function applyStaticI18n(lang) {
+    const pack = I18N[lang] || I18N.en;
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (key && typeof pack[key] === "string") el.textContent = pack[key];
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-aria");
+      if (key && typeof pack[key] === "string") el.setAttribute("aria-label", pack[key]);
+    });
+    document.querySelectorAll("[data-i18n-cta]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-cta");
+      if (key && typeof pack[key] === "string") el.textContent = pack[key];
+    });
+  }
+
+  function patchCardCopy(lang) {
+    cardEls.forEach((card) => {
+      const p = card._project;
+      if (!p) return;
+      const typeEl = card.querySelector(".card-type");
+      const titleEl = card.querySelector(".card-title");
+      const descEl = card.querySelector(".card-desc");
+      if (typeEl) typeEl.textContent = loc(p.type, lang);
+      if (titleEl) titleEl.textContent = loc(p.title, lang);
+      if (descEl) descEl.textContent = loc(p.description, lang);
+      const title = loc(p.title, lang);
+      if (p.kind === "olivia" && p.videos) {
+        card.setAttribute(
+          "aria-label",
+          ui("openOliviaGallery", lang)(title, p.videos.length)
+        );
+      } else if (p.kind === "blender" && p.images) {
+        card.setAttribute(
+          "aria-label",
+          ui("openBlenderGallery", lang)(title, p.images.length)
+        );
+      } else {
+        card.setAttribute("aria-label", title);
+      }
+    });
+  }
+
+  function setLang(lang) {
+    if (lang !== "en" && lang !== "de") lang = "en";
+    currentLang = lang;
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch (_) {}
+    document.documentElement.lang = lang;
+    applyStaticI18n(lang);
+    patchCardCopy(lang);
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+      const on = btn.getAttribute("data-lang") === lang;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  function setupLangSwitch() {
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const lang = btn.getAttribute("data-lang");
+        if (lang) setLang(lang);
+      });
+    });
+    setLang(currentLang);
+  }
+
   renderProjects();
   setupBioExpand();
+  setupLangSwitch();
   scheduleLayout();
   setupMagnetic();
   setupParallax();
