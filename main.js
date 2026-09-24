@@ -934,13 +934,17 @@
   const HOT_OLIVIA = 1.5;
   const HOT_BLENDER = 1.32;
   const HOT_TANGPOKO = 1.4;
+  /** MVFW sits upper-left - slightly softer hot so expand + inward fit orbit. */
+  const HOT_MVFW = 1.45;
   const VIEW_PAD = 14;
   /** Inward slide (px) when Blender is hot - toward orbit center, not edge balloon. */
   const BLENDER_INWARD = 64;
   /** Stronger inward (px) for Tangpoko - lower-left edge, keep expand inside orbit. */
   const TANGPOKO_INWARD = 84;
+  /** MVFW upper-left - slide toward center while growing down. */
+  const MVFW_INWARD = 92;
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
-  const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia"]);
+  const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
   const EXPAND_UP_IDS = new Set(["tangpoko"]);
 
@@ -949,7 +953,16 @@
     if (id === "olivia") return HOT_OLIVIA;
     if (id === "blender") return HOT_BLENDER;
     if (id === "tangpoko") return HOT_TANGPOKO;
+    if (id === "mvfw") return HOT_MVFW;
     return HOT;
+  }
+
+  function inwardAmountFor(card) {
+    const id = card?.dataset?.id;
+    if (id === "blender") return BLENDER_INWARD;
+    if (id === "tangpoko") return TANGPOKO_INWARD;
+    if (id === "mvfw") return MVFW_INWARD;
+    return 0;
   }
 
   /** Vector from card base toward orbit center; used for Blender inward bias. */
@@ -983,12 +996,24 @@
     const expandUp = EXPAND_UP_IDS.has(card.dataset.id);
     let maxScaleH;
     if (expandDown) {
-      /* Top edge stays near resting top; growth goes down - clamp by bottom room. */
-      const topEdge = baseY - ch / 2;
+      /* Top edge stays near resting top; growth goes down - clamp by bottom room.
+         MVFW also slides inward - use effective center for edge pad. */
+      let cxEff = baseX;
+      let cyEff = baseY;
+      const inwardAmt = inwardAmountFor(card);
+      if (inwardAmt && card.classList.contains("is-hot")) {
+        const inward = inwardTowardCenter(card, inwardAmt);
+        cxEff = baseX + inward.x;
+        cyEff = baseY + inward.y;
+      }
+      const topEdge = cyEff - ch / 2;
       const roomBelow = Math.max(8, oH - VIEW_PAD - topEdge);
       const roomAbove = Math.max(8, topEdge - VIEW_PAD);
       /* Allow slight upward creep only within existing top pad; prefer downward. */
       maxScaleH = Math.min(roomBelow / ch, (ch + 2 * roomAbove) / ch);
+      const maxHalfWAdj = Math.max(8, Math.min(cxEff - VIEW_PAD, oW - VIEW_PAD - cxEff));
+      const maxScale = Math.min((2 * maxHalfWAdj) / cw, maxScaleH);
+      return Math.max(1, Math.min(desiredScale, maxScale));
     } else if (expandUp) {
       /* Bottom edge stays; growth goes up - clamp by top room.
          Tangpoko also slides inward - use pushed center for edge pad (≥10px). */
@@ -1024,8 +1049,6 @@
       const maxScale = Math.min((2 * maxHalfWAdj) / cw, maxScaleH);
       return Math.max(1, Math.min(desiredScale, maxScale));
     }
-    const maxScale = Math.min((2 * maxHalfW) / cw, maxScaleH);
-    return Math.max(1, Math.min(desiredScale, maxScale));
   }
 
   function placeOrbit() {
@@ -1736,6 +1759,73 @@
     setupBioPhotoLightbox();
   }
 
+
+  /**
+   * Cap unscaled max-height so after current/hot scale the visual height fits
+   * in the orbit (with pad). Clears when leaving hot. Enables internal scroll.
+   */
+  function fitHotCardHeight(card, scaleHint) {
+    if (!card) return;
+    if (!isDesktopOrbit() || constellation?.classList.contains("is-stacked")) {
+      /* Mobile stacked: keep cards from oddly tall overflow */
+      if (card.classList.contains("is-hot") || card.classList.contains("is-expanded")) {
+        const vh = window.innerHeight || 640;
+        card.style.maxHeight = `${Math.max(220, Math.floor(vh * 0.72))}px`;
+      } else {
+        card.style.maxHeight = "";
+      }
+      return;
+    }
+    if (!orbit || !(card.classList.contains("is-hot") || card.classList.contains("is-expanded"))) {
+      card.style.maxHeight = "";
+      return;
+    }
+    const baseX = parseFloat(card.dataset.baseX);
+    const baseY = parseFloat(card.dataset.baseY);
+    if (!Number.isFinite(baseX) || !Number.isFinite(baseY)) {
+      card.style.maxHeight = "";
+      return;
+    }
+    const oW = orbit.clientWidth;
+    const oH = orbit.clientHeight;
+    const inwardAmt = inwardAmountFor(card);
+    let cxEff = baseX;
+    let cyEff = baseY;
+    if (inwardAmt) {
+      const inward = inwardTowardCenter(card, inwardAmt);
+      cxEff = baseX + inward.x;
+      cyEff = baseY + inward.y;
+    }
+    const scale =
+      scaleHint ||
+      card._mag?.tScale ||
+      card._mag?.scale ||
+      parseFloat(card.dataset.baseScale || "1") ||
+      1;
+    const safeScale = Math.max(0.5, scale);
+    let roomPx;
+    if (EXPAND_DOWN_IDS.has(card.dataset.id)) {
+      /* Top of unscaled card near cyEff - ch/2; visual grows downward.
+         Use resting height estimate for top edge, then available below. */
+      const restingH = card.offsetHeight || 210;
+      const topEdge = cyEff - restingH / 2;
+      roomPx = Math.max(120, oH - VIEW_PAD - topEdge);
+    } else if (EXPAND_UP_IDS.has(card.dataset.id)) {
+      const restingH = card.offsetHeight || 210;
+      const bottomEdge = cyEff + restingH / 2;
+      roomPx = Math.max(120, bottomEdge - VIEW_PAD);
+    } else {
+      const maxHalfH = Math.max(60, Math.min(cyEff - VIEW_PAD, oH - VIEW_PAD - cyEff));
+      roomPx = maxHalfH * 2;
+    }
+    const unscaledMax = Math.floor(roomPx / safeScale);
+    card.style.maxHeight = `${Math.max(160, unscaledMax)}px`;
+  }
+
+  function clearHotCardHeight(card) {
+    if (card) card.style.maxHeight = "";
+  }
+
   /* Magnetic hover - HOT 1.65 (Olivia 1.5, Blender 1.32+inward); sibling push */
   function setupMagnetic() {
     if (reduceMotion || coarsePointer) return;
@@ -1802,12 +1892,9 @@
         const s = ensureMag(card);
         if (card === hotCard) {
           /* Slide toward orbit center while revealing text (not just scale into edges). */
-          if (hotCard.dataset.id === "blender") {
-            const inward = inwardTowardCenter(hotCard, BLENDER_INWARD);
-            s.tPushX = inward.x;
-            s.tPushY = inward.y;
-          } else if (hotCard.dataset.id === "tangpoko") {
-            const inward = inwardTowardCenter(hotCard, TANGPOKO_INWARD);
+          const amt = inwardAmountFor(hotCard);
+          if (amt) {
+            const inward = inwardTowardCenter(hotCard, amt);
             s.tPushX = inward.x;
             s.tPushY = inward.y;
           } else {
@@ -1856,6 +1943,7 @@
       } else {
         s.tScale = desired;
       }
+      fitHotCardHeight(card, s.tScale);
       return s;
     }
 
@@ -1897,14 +1985,27 @@
     cardEls.forEach((card) => {
       card.addEventListener("pointerenter", () => {
         constellation.classList.add("has-hover");
-        card.classList.add("is-hot");
+        /* is-expanded gates user-select; pair with is-hot so grown cards are copyable. */
+        card.classList.add("is-hot", "is-expanded");
         const s = setHotTarget(card);
         s.tRotX = 0;
         s.tRotY = 0;
         kickMag();
+        /* Desc unclamps after paint - remeasure room + maxHeight. */
+        requestAnimationFrame(() => {
+          if (!card.classList.contains("is-hot")) return;
+          setHotTarget(card);
+          kickMag();
+        });
+        setTimeout(() => {
+          if (!card.classList.contains("is-hot")) return;
+          setHotTarget(card);
+          kickMag();
+        }, 420);
       });
       card.addEventListener("pointerleave", () => {
-        card.classList.remove("is-hot");
+        card.classList.remove("is-hot", "is-expanded");
+        clearHotCardHeight(card);
         const s = ensureMag(card);
         const base = parseFloat(card.dataset.baseScale || "1") || 1;
         s.tScale = base;
@@ -1914,6 +2015,21 @@
         kickMag();
         if (!constellation.querySelector(".card.is-hot")) {
           constellation.classList.remove("has-hover");
+        }
+      });
+      /* Remeasure after desc unclamps / max-height transition grows content. */
+      card.addEventListener("transitionend", (e) => {
+        if (!card.classList.contains("is-hot")) return;
+        if (e.target !== card && !card.contains(e.target)) return;
+        if (e.propertyName !== "max-height" && e.propertyName !== "opacity") return;
+        const s = card._mag;
+        fitHotCardHeight(card, s?.tScale);
+        if (s) {
+          const base = parseFloat(card.dataset.baseScale || "1") || 1;
+          const desired = base * hotMulFor(card);
+          const room = clampHoverScale(card, desired);
+          s.tScale = room < desired - 0.08 ? Math.max(room, desired * 0.88) : desired;
+          kickMag();
         }
       });
       card.addEventListener("pointermove", (e) => {
@@ -1936,12 +2052,15 @@
     if (card) {
       card.classList.add("is-expanded", "is-hot");
       constellation.classList.add("has-hover");
+      const base = parseFloat(card.dataset.baseScale || "1") || 1;
+      fitHotCardHeight(card, base * hotMulFor(card));
     }
   });
   constellation?.addEventListener("focusout", (e) => {
     const card = e.target.closest(".card");
     if (card && !card.contains(e.relatedTarget)) {
       card.classList.remove("is-expanded", "is-hot");
+      clearHotCardHeight(card);
       if (!constellation.querySelector(".card.is-hot:focus-within, .card.is-hot:hover")) {
         constellation.classList.remove("has-hover");
       }
@@ -2125,8 +2244,12 @@
         if (!card || card.classList.contains("card-coming")) return;
         if (touchExpanded !== card) {
           e.preventDefault();
-          if (touchExpanded) touchExpanded.classList.remove("is-expanded", "is-hot");
+          if (touchExpanded) {
+            touchExpanded.classList.remove("is-expanded", "is-hot");
+            clearHotCardHeight(touchExpanded);
+          }
           card.classList.add("is-expanded", "is-hot");
+          fitHotCardHeight(card, 1);
           touchExpanded = card;
         }
       },
@@ -2135,6 +2258,7 @@
     document.addEventListener("click", (e) => {
       if (touchExpanded && !e.target.closest(".card")) {
         touchExpanded.classList.remove("is-expanded", "is-hot");
+        clearHotCardHeight(touchExpanded);
         touchExpanded = null;
       }
     });

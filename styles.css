@@ -1,4 +1,4 @@
-/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow36 */
+/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow37 */
 
 :root {
   --gold: #f3d48a;
@@ -979,6 +979,39 @@ body.bio-expanded .card:not(.is-hot) {
 }
 
 
+
+/* Expanded/hot: keep content inside card via internal scroll (JS also caps max-height). */
+.card.is-hot,
+.card.is-expanded {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(243, 212, 138, 0.45) rgba(8, 10, 18, 0.25);
+}
+
+.card.is-hot::-webkit-scrollbar,
+.card.is-expanded::-webkit-scrollbar {
+  width: 5px;
+}
+
+.card.is-hot::-webkit-scrollbar-track,
+.card.is-expanded::-webkit-scrollbar-track {
+  background: rgba(8, 10, 18, 0.2);
+  border-radius: 999px;
+}
+
+.card.is-hot::-webkit-scrollbar-thumb,
+.card.is-expanded::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 190, 140, 0.55),
+    rgba(243, 212, 138, 0.5),
+    rgba(255, 150, 180, 0.45)
+  );
+  border-radius: 999px;
+}
+
 /* VRIDIA overlays bio when hot (constellation.has-hover raises stacking).
    Downward expand is handled in JS via growDown compensate on translateY.
    Tangpoko expands upward (growUp) so it stays inside the site top. */
@@ -996,6 +1029,14 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="tangpoko"]:focus-visible {
   z-index: 30;
   transform-origin: center bottom;
+}
+
+.card[data-id="mvfw"].is-hot,
+.card[data-id="mvfw"].is-expanded,
+.card[data-id="mvfw"]:hover,
+.card[data-id="mvfw"]:focus-visible {
+  z-index: 30;
+  transform-origin: top center;
 }
 
 /* Card parts */
@@ -1104,11 +1145,30 @@ body.bio-expanded .card:not(.is-hot) {
 }
 
 
-/* Desktop: allow selecting / copying card + bio copy */
+/* Card preview copy: not selectable. Expanded cards only (tap/focus). Bio unchanged. */
+.card .card-type,
+.card .card-title,
+.card .card-desc,
+.card .card-cta,
+.card .card-cta-link,
+.card .card-actions {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card.is-expanded .card-type,
+.card.is-expanded .card-title,
+.card.is-expanded .card-desc,
+.card.is-expanded .card-cta,
+.card.is-expanded .card-cta-link,
+.card.is-expanded .card-actions {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* Desktop: bio plate stays selectable */
 @media (min-width: 861px) {
-  .card-type,
-  .card-title,
-  .card-desc,
   .bio-line,
   .bio-skill-title,
   .bio-skill-body {
