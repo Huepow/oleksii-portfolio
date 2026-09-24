@@ -1274,7 +1274,8 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="digital-euphoria"].is-expanded,
 .card[data-id="digital-euphoria"]:hover,
 .card[data-id="digital-euphoria"]:focus-visible {
-  z-index: 30;
+  /* Above Olivia (40) only while expanding/hovering; resting z unchanged */
+  z-index: 45;
   transform-origin: top center;
 }
 
@@ -1922,8 +1923,11 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="blender"]:hover,
 .card[data-id="blender"]:focus,
 .card[data-id="blender"]:focus-visible,
-.card[data-id="blender"].is-hot {
+.card[data-id="blender"].is-hot,
+.card[data-id="blender"].is-expanded {
   cursor: pointer;
+  /* Above Olivia (40) only while expanding/hovering; resting z unchanged */
+  z-index: 45;
 }
 
 .card[data-id="blender"] .card-desc {
