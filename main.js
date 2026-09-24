@@ -658,11 +658,6 @@
 
     const featuredWrap = document.createElement("div");
     featuredWrap.className = "card-thumb blender-featured";
-    const badge = document.createElement("span");
-    badge.className = "badge featured";
-    badge.dataset.i18nCta = "featured";
-    badge.textContent = ui("featured");
-    featuredWrap.appendChild(badge);
     const img = document.createElement("img");
     img.src = project.featured.src;
     img.alt = project.featured.title;
@@ -725,13 +720,6 @@
     btn.addEventListener("click", () => openLightbox(item.src, item.title));
     const wrap = document.createElement("div");
     wrap.className = "thumb-wrap";
-    if (featured) {
-      const badge = document.createElement("span");
-      badge.className = "badge featured";
-      badge.dataset.i18nCta = "featured";
-      badge.textContent = ui("featured");
-      wrap.appendChild(badge);
-    }
     const img = document.createElement("img");
     img.src = item.src;
     img.alt = item.title;
