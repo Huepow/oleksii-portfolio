@@ -930,12 +930,15 @@
    * When bio is expanded, radiusBias is multiplied by orbit boost
    * and cards scale up so they "expand with" the bio.
    */
-  const HOT = 1.65;
-  const HOT_OLIVIA = 1.5;
+  /* Default hot ~1.4: bigger card, not near-fullscreen. Per-card overrides below. */
+  const HOT = 1.4;
+  const HOT_OLIVIA = 1.45;
   const HOT_BLENDER = 1.32;
   const HOT_TANGPOKO = 1.4;
   /** MVFW sits upper-left - slightly softer hot so expand + inward fit orbit. */
   const HOT_MVFW = 1.45;
+  /** Digital Euphoria - slight soft hot after inward so it stays in orbit. */
+  const HOT_EUPHORIA = 1.38;
   const VIEW_PAD = 14;
   /** Inward slide (px) when Blender is hot - toward orbit center, not edge balloon. */
   const BLENDER_INWARD = 64;
@@ -943,6 +946,8 @@
   const TANGPOKO_INWARD = 84;
   /** MVFW upper-left - slide toward center while growing down. */
   const MVFW_INWARD = 92;
+  /** Digital Euphoria upper - slide toward center like MVFW. */
+  const EUPHORIA_INWARD = 80;
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -954,6 +959,7 @@
     if (id === "blender") return HOT_BLENDER;
     if (id === "tangpoko") return HOT_TANGPOKO;
     if (id === "mvfw") return HOT_MVFW;
+    if (id === "digital-euphoria") return HOT_EUPHORIA;
     return HOT;
   }
 
@@ -962,6 +968,7 @@
     if (id === "blender") return BLENDER_INWARD;
     if (id === "tangpoko") return TANGPOKO_INWARD;
     if (id === "mvfw") return MVFW_INWARD;
+    if (id === "digital-euphoria") return EUPHORIA_INWARD;
     return 0;
   }
 
@@ -1312,10 +1319,7 @@
       const hot = card.classList.contains("is-hot");
       const desiredHot = cardScale * hotMulFor(card);
       const hotTarget = hot
-        ? (() => {
-            const room = clampHoverScale(card, desiredHot);
-            return room < desiredHot - 0.08 ? Math.max(room, desiredHot * 0.88) : desiredHot;
-          })()
+        ? Math.min(desiredHot, clampHoverScale(card, desiredHot))
         : cardScale;
       if (!card._mag || !("tScale" in card._mag)) {
         card._mag = {
@@ -1818,7 +1822,9 @@
       const maxHalfH = Math.max(60, Math.min(cyEff - VIEW_PAD, oH - VIEW_PAD - cyEff));
       roomPx = maxHalfH * 2;
     }
-    const unscaledMax = Math.floor(roomPx / safeScale);
+    /* Soft-cap visual height (~52% orbit) so expand stays a bigger card, not fullscreen. */
+    const softCap = Math.min(roomPx, oH * 0.46);
+    const unscaledMax = Math.floor(softCap / safeScale);
     card.style.maxHeight = `${Math.max(160, unscaledMax)}px`;
   }
 
@@ -1826,7 +1832,27 @@
     if (card) card.style.maxHeight = "";
   }
 
-  /* Magnetic hover - HOT 1.65 (Olivia 1.5, Blender 1.32+inward); sibling push */
+  /** Wheel over hot/expanded card: force internal scroll (transform scale can flake native wheel). */
+  function bindHotCardWheel(card) {
+    if (!card || card._hotWheelBound) return;
+    card._hotWheelBound = true;
+    card.addEventListener(
+      "wheel",
+      (e) => {
+        if (!card.classList.contains("is-hot") && !card.classList.contains("is-expanded")) return;
+        const maxScroll = card.scrollHeight - card.clientHeight;
+        if (maxScroll <= 1) return;
+        const next = Math.max(0, Math.min(maxScroll, card.scrollTop + e.deltaY));
+        if (next === card.scrollTop) return;
+        e.preventDefault();
+        e.stopPropagation();
+        card.scrollTop = next;
+      },
+      { passive: false }
+    );
+  }
+
+  /* Magnetic hover - HOT ~1.4 (Olivia 1.45, Blender 1.32+inward, Euphoria inward); sibling push */
   function setupMagnetic() {
     if (reduceMotion || coarsePointer) return;
 
@@ -1936,13 +1962,9 @@
       const base = parseFloat(card.dataset.baseScale || "1") || 1;
       const desired = base * hotMulFor(card);
       applySiblingPush(card);
-      /* Full HOT scale - do not nudge hot card. Clamp only if still clipped. */
+      /* Honor orbit clamp so grown AABB stays inside pad (no 0.88 floor override). */
       const room = clampHoverScale(card, desired);
-      if (room < desired - 0.08) {
-        s.tScale = Math.max(room, desired * 0.88);
-      } else {
-        s.tScale = desired;
-      }
+      s.tScale = Math.min(desired, room);
       fitHotCardHeight(card, s.tScale);
       return s;
     }
@@ -1983,10 +2005,11 @@
     }
 
     cardEls.forEach((card) => {
+      bindHotCardWheel(card);
       card.addEventListener("pointerenter", () => {
         constellation.classList.add("has-hover");
-        /* is-expanded gates user-select; pair with is-hot so grown cards are copyable. */
-        card.classList.add("is-hot", "is-expanded");
+        /* Hover grow: is-hot only. is-expanded is for focus / mobile tap (copyable). */
+        card.classList.add("is-hot");
         const s = setHotTarget(card);
         s.tRotX = 0;
         s.tRotY = 0;
@@ -2004,14 +2027,22 @@
         }, 420);
       });
       card.addEventListener("pointerleave", () => {
-        card.classList.remove("is-hot", "is-expanded");
-        clearHotCardHeight(card);
+        card.classList.remove("is-hot");
+        /* Keep is-expanded if keyboard focus still holds the card. */
+        if (!card.matches(":focus-within")) {
+          card.classList.remove("is-expanded");
+          clearHotCardHeight(card);
+        } else {
+          fitHotCardHeight(card, card._mag?.tScale);
+        }
         const s = ensureMag(card);
         const base = parseFloat(card.dataset.baseScale || "1") || 1;
-        s.tScale = base;
-        s.tRotX = 0;
-        s.tRotY = 0;
-        clearSiblingPush();
+        if (!card.classList.contains("is-expanded")) {
+          s.tScale = base;
+          s.tRotX = 0;
+          s.tRotY = 0;
+          clearSiblingPush();
+        }
         kickMag();
         if (!constellation.querySelector(".card.is-hot")) {
           constellation.classList.remove("has-hover");
@@ -2028,13 +2059,14 @@
           const base = parseFloat(card.dataset.baseScale || "1") || 1;
           const desired = base * hotMulFor(card);
           const room = clampHoverScale(card, desired);
-          s.tScale = room < desired - 0.08 ? Math.max(room, desired * 0.88) : desired;
+          s.tScale = Math.min(desired, room);
           kickMag();
         }
       });
       card.addEventListener("pointermove", (e) => {
         if (!isDesktopOrbit() || constellation.classList.contains("is-stacked")) return;
-        if (hasActiveTextSelection(card)) return;
+        /* Selection only possible on truly expanded cards - skip magnetic rotate then. */
+        if (card.classList.contains("is-expanded") && hasActiveTextSelection(card)) return;
         const rect = card.getBoundingClientRect();
         const px = (e.clientX - rect.left) / rect.width - 0.5;
         const py = (e.clientY - rect.top) / rect.height - 0.5;
@@ -2338,6 +2370,13 @@
   setupLangSwitch();
   scheduleLayout();
   setupMagnetic();
+  /* Wheel scroll for hot cards even when magnetic hover is off (touch / reduced motion). */
+  cardEls.forEach((card) => {
+    if (!card._hotWheelBound) {
+      bindHotCardWheel(card);
+      card._hotWheelBound = true;
+    }
+  });
   setupParallax();
   setupCursorSpark();
   initParticles();

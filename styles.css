@@ -1,4 +1,4 @@
-/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow37 */
+/* Oleksii portfolio - cinematic orbit / liquid-glass - v=wow38 */
 
 :root {
   --gold: #f3d48a;
@@ -784,6 +784,7 @@ body.bio-expanded {
   position: absolute;
   width: var(--card-w);
   pointer-events: auto;
+  cursor: pointer;
   border-radius: 14px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, transparent 38%),
@@ -980,7 +981,7 @@ body.bio-expanded .card:not(.is-hot) {
 
 
 
-/* Expanded/hot: keep content inside card via internal scroll (JS also caps max-height). */
+/* Expanded/hot: bounded card with internal scroll (JS caps max-height). */
 .card.is-hot,
 .card.is-expanded {
   overflow-x: hidden;
@@ -988,6 +989,9 @@ body.bio-expanded .card:not(.is-hot) {
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: rgba(243, 212, 138, 0.45) rgba(8, 10, 18, 0.25);
+  cursor: pointer;
+  /* Help wheel/trackpad scroll the scaled card reliably. */
+  touch-action: pan-y;
 }
 
 .card.is-hot::-webkit-scrollbar,
@@ -1035,6 +1039,14 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="mvfw"].is-expanded,
 .card[data-id="mvfw"]:hover,
 .card[data-id="mvfw"]:focus-visible {
+  z-index: 30;
+  transform-origin: top center;
+}
+
+.card[data-id="digital-euphoria"].is-hot,
+.card[data-id="digital-euphoria"].is-expanded,
+.card[data-id="digital-euphoria"]:hover,
+.card[data-id="digital-euphoria"]:focus-visible {
   z-index: 30;
   transform-origin: top center;
 }
@@ -1145,15 +1157,22 @@ body.bio-expanded .card:not(.is-hot) {
 }
 
 
-/* Card preview copy: not selectable. Expanded cards only (tap/focus). Bio unchanged. */
+/* Card preview / hover-grow: not selectable. Truly expanded (tap/focus) only. Bio unchanged. */
 .card .card-type,
 .card .card-title,
 .card .card-desc,
 .card .card-cta,
 .card .card-cta-link,
-.card .card-actions {
+.card .card-actions,
+.card.is-hot .card-type,
+.card.is-hot .card-title,
+.card.is-hot .card-desc,
+.card.is-hot .card-cta,
+.card.is-hot .card-cta-link,
+.card.is-hot .card-actions {
   user-select: none;
   -webkit-user-select: none;
+  cursor: pointer;
 }
 
 .card.is-expanded .card-type,
@@ -1261,14 +1280,14 @@ body.bio-expanded .card:not(.is-hot) {
     color 0.35s ease;
 }
 
-/* Hot/expand: full readable text (higher-specificity per-card rules below reinforce). */
+/* Hot/expand: full readable text inside scroll region (not overflow:visible escape). */
 .card.is-hot .card-desc,
 .card.is-expanded .card-desc,
 .card:hover .card-desc,
 .card:focus-visible .card-desc {
   -webkit-line-clamp: unset;
   max-height: none;
-  overflow: visible;
+  overflow: hidden;
   opacity: 1;
   color: rgba(230, 220, 200, 0.88);
 }
@@ -1300,16 +1319,20 @@ body.bio-expanded .card:not(.is-hot) {
   min-height: 88px;
 }
 
+/* Olivia ~20% larger than prior 1.2 width (1.2 * 1.2 = 1.44); always frontmost card. */
 .card[data-id="olivia"] {
-  width: calc(var(--card-w) * 1.2);
+  width: calc(var(--card-w) * 1.44);
   cursor: pointer;
+  z-index: 40;
 }
 
 .card[data-id="olivia"]:hover,
 .card[data-id="olivia"]:focus,
 .card[data-id="olivia"]:focus-visible,
-.card[data-id="olivia"].is-hot {
+.card[data-id="olivia"].is-hot,
+.card[data-id="olivia"].is-expanded {
   cursor: pointer;
+  z-index: 40;
 }
 
 .card[data-id="olivia"] .card-desc {
@@ -1323,7 +1346,7 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="olivia"]:focus-visible .card-desc {
   -webkit-line-clamp: unset;
   max-height: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .card[data-id="olivia"] .card-cta {
@@ -1663,7 +1686,7 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="blender"]:focus-visible .card-desc {
   -webkit-line-clamp: unset;
   max-height: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Tangpoko resting 3 lines; Tangpoko + VRIDIA full text when hot */
@@ -1682,7 +1705,7 @@ body.bio-expanded .card:not(.is-hot) {
 .card[data-id="vridia"]:focus-visible .card-desc {
   -webkit-line-clamp: unset;
   max-height: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .blender-featured {
@@ -1999,8 +2022,11 @@ body.bio-expanded .card:not(.is-hot) {
   .bio.is-expanded {
     transform: translate(-50%, -50%) scale(var(--bio-expand-scale, 1.85));
   }
-  /* Slightly compact featured cards so bottom of ring clears bio at 800px tall */
-  .card[data-id="olivia"],
+  /* Olivia stays 1.44 (~20% over prior 1.2); blender keeps compact 1.1 for short orbit. */
+  .card[data-id="olivia"] {
+    width: calc(var(--card-w) * 1.44);
+    z-index: 40;
+  }
   .card[data-id="blender"] {
     width: calc(var(--card-w) * 1.1);
   }
@@ -2029,7 +2055,7 @@ body.bio-expanded .card:not(.is-hot) {
   .card[data-id="vridia"].is-expanded .card-desc {
     -webkit-line-clamp: unset;
     max-height: none;
-    overflow: visible;
+    overflow: hidden;
   }
   .olivia-rows,
   .blender-rows {
