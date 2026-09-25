@@ -1001,7 +1001,7 @@
   /** Olivia right edge - stronger inward so featured + grid fit without scroll. */
   const OLIVIA_INWARD = 112;
   /** Cards that expand to natural height (no maxHeight / peach scrollbar). */
-  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia", "tangpoko", "before-backrooms", "blender"]);
+  const NO_SCROLL_HOT_IDS = new Set(["digital-euphoria", "vridia", "olivia", "tangpoko", "before-backrooms", "blender", "mvfw"]);
   /** Cards that should grow downward (top edge stays put) so they do not clip the site top. */
   const EXPAND_DOWN_IDS = new Set(["digital-euphoria", "vridia", "mvfw"]);
   /** Cards that should grow upward (bottom edge stays put) - Tangpoko sits lower. */
@@ -2104,7 +2104,7 @@
   function fitHotCardHeight(card, scaleHint) {
     if (!card) return;
     const noScroll = NO_SCROLL_HOT_IDS.has(card.dataset?.id);
-    /* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox / Virtual Space: expand to content - no internal scrollbar. */
+    /* Euphoria / VRIDIA / Olivia / Tangpoko / Roblox / Virtual Space / MVFW: expand to content - no internal scrollbar. */
     if (noScroll && (!isDesktopOrbit() || constellation?.classList.contains("is-stacked"))) {
       card.style.maxHeight = "";
       syncCardScrollBubble(card);
