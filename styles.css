@@ -390,9 +390,9 @@ body.bio-expanded {
   align-items: center;
   gap: 0.4rem;
   width: min(340px, 80vw);
-  /* wow49: trim dead top/bottom frame space while keeping content centered. */
-  min-height: 8.2rem;
-  padding: 0.88rem 0.5rem;
+  /* wow50: trim another 10% while keeping content centered. */
+  min-height: 7.375rem;
+  padding: 0.5rem 0.5rem;
   border-radius: 16px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, transparent 42%),
@@ -476,8 +476,10 @@ body.bio-expanded {
     0 0 80px rgba(243, 212, 138, 0.14);
   transform: scale(var(--bio-expand-scale, 1.4));
 }
-/* Expanded bio: plate stays modest; text column scrolls when content exceeds plate. */
+/* Expanded bio keeps wow49 frame height/padding and scroll behavior unchanged. */
 .bio.is-expanded {
+  padding-top: 0.88rem;
+  padding-bottom: 0.88rem;
   overflow: hidden;
   /* Explicit height (not only max-height) so flex child % / min-height:0 scrollport works. */
   height: var(--bio-expand-max-h, 400px);
@@ -2558,7 +2560,7 @@ body.bio-expanded .card:not(.is-hot) {
     --bio-expand-scale: 1.22;
   }
   .orbit { min-height: calc(100vh - 8px); height: calc(100vh - 8px); }
-  .bio { padding: 0.88rem 0.4rem; width: min(300px, 72vw); min-height: 8.2rem; }
+  .bio { padding: 0.5rem 0.4rem; width: min(300px, 72vw); min-height: 7.375rem; }
   .bio.is-expanded { width: min(380px, 88vw); }
   .bio-line { font-size: clamp(0.6rem, 0.98vw, 0.72rem); }
   .bio-expand-cta { font-size: clamp(0.62rem, 0.98vw, 0.74rem); white-space: nowrap; }
